@@ -217,7 +217,7 @@
   <nav>
     <button id="btnFull" type="button">⛶ Toàn màn hình</button>
     <button id="btnReset" type="button">⟲ Về toàn quốc</button>
-    <a class="back" href="index.html">← Viet5ers</a>
+    <a class="back" href="index.html" title="Bản đồ 3D trên trang chủ">🧊 Bản đồ 3D (trang chủ)</a>
   </nav>
 </header>
 
@@ -280,6 +280,10 @@
       <h2>Lớp bản đồ &amp; nguồn dữ liệu</h2>
       <p class="muted">Bật/tắt lớp ở biểu tượng <b style="color:var(--gold)">⊞</b> góc phải bản đồ. Nền mặc định là <b style="color:var(--gold)">OpenTopoMap</b> (địa hình + đường đồng mức), có thể chuyển sang bóng địa hình, bản đồ vật lý, vệ tinh hoặc bản đồ nền Esri.</p>
       <p class="muted" style="margin-top:8px">
+        <b style="color:var(--gold)">Muốn xem dạng 3D?</b> Trang chủ có bản đồ địa hình 3D
+        (nghiêng, xoay, thu phóng như Google Earth, có chế độ quả cầu): <a href="index.html" style="color:var(--gold)">mở bản đồ 3D</a>.
+      </p>
+      <p class="muted">
         <b style="color:var(--gold)">Dữ liệu độ cao:</b> mặc định lấy từ API OpenTopoData (SRTM 30 m – NASA/USGS);
         nếu API bận sẽ tự chuyển sang giải mã tile DEM Terrarium (AWS Open Data – Mapzen/Joerd) ngay trong trình duyệt,
         cuối cùng là Open-Elevation. Việc tra độ cao tại một điểm dùng tile DEM trước cho nhanh và không tốn hạn mức API.
