@@ -391,6 +391,26 @@
       bGlobe.addEventListener('click', function () { toggleGlobe(); });
       btns.appendChild(bGlobe);
 
+      /* Cuộn chuột = thu phóng (mặc định phải giữ Ctrl để không cướp cuộn trang) */
+      var bScroll = el('button', 't3d-btn', '🖱️ Cuộn = zoom');
+      bScroll.type = 'button';
+      if (!map.cooperativeGestures) {
+        bScroll.disabled = true; bScroll.style.opacity = '.45';
+      }
+      bScroll.addEventListener('click', function () {
+        var nowActive = !bScroll.classList.contains('active');
+        try {
+          if (map.cooperativeGestures) {
+            if (nowActive) map.cooperativeGestures.disable(); else map.cooperativeGestures.enable();
+          }
+        } catch (e) {}
+        bScroll.classList.toggle('active', nowActive);
+        showNote(nowActive
+          ? 'Đã bật: <b style="color:#d4af37">cuộn chuột để thu phóng</b> (cuộn trang sẽ tạm dừng khi trỏ chuột vào bản đồ). Bấm lại để tắt.'
+          : defaultNote);
+      });
+      btns.appendChild(bScroll);
+
       var bReset = el('button', 't3d-btn', '⟲ Đặt lại');
       bReset.type = 'button';
       bReset.addEventListener('click', function () {
@@ -401,10 +421,13 @@
       g5.appendChild(btns);
       body.appendChild(g5);
 
-      noteEl = el('div', 't3d-note',
+      var defaultNote =
         'Kéo để di chuyển · <b style="color:#d4af37">chuột phải</b> (hoặc Ctrl + kéo) để nghiêng và xoay · ' +
-        'Ctrl + cuộn để thu phóng. Địa hình dựng từ DEM Terrarium (AWS Open Data). ' +
-        'Xem thêm <a href="vietnam-terrain-map.html">bản đồ địa hình 2D</a>.');
+        '<b style="color:#d4af37">Ctrl + cuộn</b> để thu phóng (hoặc bật nút “Cuộn = zoom”). ' +
+        'Trên cảm ứng: 1 ngón di chuyển, 2 ngón thu phóng – xoay. ' +
+        'Địa hình dựng từ DEM Terrarium (AWS Open Data). Xem thêm ' +
+        '<a href="vietnam-terrain-map.html">bản đồ địa hình 2D</a>.';
+      noteEl = el('div', 't3d-note', defaultNote);
       body.appendChild(noteEl);
 
       function toggleOrbit() {
