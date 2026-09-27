@@ -3,67 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viet5ers - The5ers Trading Community</title>
+    <title>Viet5ers — Cộng đồng The5ers &amp; Bản đồ địa hình 3D Việt Nam</title>
+    <meta name="description" content="Viet5ers: chia sẻ kiến thức, chiến lược giao dịch với quỹ The5ers và bản đồ địa hình Việt Nam 3D tương tác (nghiêng, xoay, thu phóng như Google Earth).">
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css">
+    <link rel="stylesheet" href="assets/terrain3d.css">
     <style>
+        :root {
+            --bg: #121212;
+            --panel: #1f1f1f;
+            --card: #1e1e1e;
+            --line: #2e2e2e;
+            --gold: #d4af37;
+            --text: #e0e0e0;
+            --muted: #9d9d9d;
+        }
+        * { box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212; /* Màu nền tối cho dân Trader */
-            color: #e0e0e0;
+            background-color: var(--bg);
+            color: var(--text);
             margin: 0;
             padding: 0;
             line-height: 1.6;
         }
+        a { color: var(--gold); }
+
+        /* ------------------------------ Header ------------------------------ */
         header {
-            background-color: #1f1f1f;
-            padding: 20px;
+            background-color: var(--panel);
+            padding: 16px 20px;
             text-align: center;
-            border-bottom: 3px solid #d4af37; /* Màu vàng gold */
+            border-bottom: 3px solid var(--gold);
         }
         h1 {
             margin: 0;
-            color: #d4af37;
-            font-size: 2.5rem;
+            color: var(--gold);
+            font-size: 2.3rem;
+            letter-spacing: .5px;
         }
         .subtitle {
             font-style: italic;
             color: #aaa;
+            margin: 4px 0 0;
         }
-        .container {
-            max-width: 800px;
-            margin: 30px auto;
-            padding: 0 20px;
+        .header-links { margin-top: 12px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+        /* ------------------------------ Nút -------------------------------- */
+        .btn {
+            display: inline-block;
+            background-color: var(--gold);
+            color: #000;
+            padding: 9px 18px;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+            font-size: .92rem;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
         }
+        .btn:hover { background-color: #b3922b; }
+        .btn.ghost { background: #262626; color: #ddd; border: 1px solid var(--line); }
+        .btn.ghost:hover { background: #262626; color: var(--gold); border-color: var(--gold); }
+
+        /* --------------------------- Bản đồ 3D ------------------------------ */
+        .map-section {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 18px 20px 6px;
+        }
+        .map-frame {
+            position: relative;
+            width: 100%;
+            height: clamp(430px, 74vh, 900px);
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid #333;
+            box-shadow: 0 18px 50px rgba(0,0,0,.6);
+        }
+        #map3d { position: absolute; inset: 0; }
+        .map-caption {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin: 10px 2px 0;
+            font-size: .84rem;
+            color: var(--muted);
+        }
+        .map-caption strong { color: var(--gold); }
+        .map-caption a { color: var(--gold); }
+
+        /* ------------------------------ Nội dung ---------------------------- */
+        .container { max-width: 900px; margin: 26px auto 0; padding: 0 20px; }
         .card {
-            background-color: #1e1e1e;
+            background-color: var(--card);
             padding: 20px;
             margin-bottom: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid #262626;
         }
         h2 {
             color: #fff;
-            border-left: 4px solid #d4af37;
+            border-left: 4px solid var(--gold);
             padding-left: 10px;
+            font-size: 1.25rem;
+            margin-top: 0;
         }
-        .btn {
-            display: inline-block;
-            background-color: #d4af37;
-            color: #000;
-            padding: 10px 20px;
-            text-decoration: none;
-            font-weight: bold;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-        .btn:hover {
-            background-color: #b3922b;
-        }
+        h3 { color: var(--gold); font-size: 1rem; margin-bottom: 6px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+        .mini { background: #232323; border: 1px solid var(--line); border-radius: 8px; padding: 13px 15px; }
+        .mini p { margin: 0; font-size: .88rem; color: #c9c9c9; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 6px; }
+
         footer {
             text-align: center;
             padding: 20px;
             font-size: 0.9rem;
             color: #666;
             border-top: 1px solid #333;
+            margin-top: 26px;
+        }
+
+        @media (max-width: 700px) {
+            h1 { font-size: 1.7rem; }
+            .map-frame { height: 62vh; }
+            .map-section { padding: 12px 10px 0; }
+            .map-caption { font-size: .78rem; }
         }
     </style>
 </head>
@@ -72,7 +141,27 @@
     <header>
         <h1>Viet5ers</h1>
         <p class="subtitle">Hành trình chinh phục quỹ The5ers</p>
+        <div class="header-links">
+            <a class="btn" href="#ban-do-3d">🗺️ Bản đồ địa hình 3D Việt Nam</a>
+            <a class="btn ghost" href="vietnam-terrain-map.html">🧭 Xem bản đồ 2D (phân tầng độ cao)</a>
+        </div>
     </header>
+
+    <!-- ============================ BẢN ĐỒ 3D ============================ -->
+    <section class="map-section" id="ban-do-3d">
+        <div class="map-frame">
+            <div id="map3d"></div>
+            <!-- Bảng điều khiển do terrain3d.js dựng nội dung -->
+            <div id="map3d-panel"></div>
+            <div class="t3d-hint" id="map3d-hint">
+                Kéo để di chuyển · <b>chuột phải</b> hoặc Ctrl + kéo để nghiêng &amp; xoay · Ctrl + cuộn để thu phóng
+            </div>
+        </div>
+        <div class="map-caption">
+            <span><strong>Bản đồ địa hình 3D Việt Nam</strong> — nghiêng, xoay, thu phóng như Google Earth. Địa hình dựng từ DEM Terrarium (AWS Open Data).</span>
+            <span>Bảng điều khiển ở góc trái bản đồ · <a href="vietnam-terrain-map.html">Mở bản đồ 2D đầy đủ tính năng →</a></span>
+        </div>
+    </section>
 
     <div class="container">
         <!-- Giới thiệu -->
@@ -88,7 +177,31 @@
                 <li>📈 <strong>The5ers Strategy:</strong> Chia sẻ kinh nghiệm pass quỹ.</li>
                 <li>📊 <strong>Market Analysis:</strong> Nhận định thị trường Vàng, Forex theo ngày.</li>
                 <li>💬 <strong>On-Demand:</strong> Phân tích cặp tiền theo yêu cầu của bạn.</li>
+                <li>🗺️ <strong>Bản đồ địa hình Việt Nam:</strong> bản đồ 3D tương tác ngay trên trang này, cùng <a href="vietnam-terrain-map.html">bản đồ 2D</a> với phân tầng độ cao, đỉnh núi, biển đảo và mặt cắt địa hình.</li>
             </ul>
+        </div>
+
+        <!-- Hướng dẫn dùng bản đồ 3D -->
+        <div class="card">
+            <h2>Hướng dẫn xem bản đồ 3D</h2>
+            <div class="grid">
+                <div class="mini">
+                    <h3>🖱️ Chuột</h3>
+                    <p>Kéo trái để di chuyển · kéo <strong>chuột phải</strong> (hoặc Ctrl + kéo chuột trái) để nghiêng và xoay · <strong>Ctrl + cuộn</strong> để thu phóng.</p>
+                </div>
+                <div class="mini">
+                    <h3>📱 Cảm ứng</h3>
+                    <p>Một ngón để di chuyển · hai ngón để thu phóng và xoay · hai ngón kéo lên/xuống để nghiêng.</p>
+                </div>
+                <div class="mini">
+                    <h3>🎛️ Bảng điều khiển</h3>
+                    <p>Đổi <strong>lớp nền</strong> (vệ tinh, địa hình, tối, sáng), <strong>bay tới</strong> địa danh nổi tiếng, chỉnh <strong>độ nhấn địa hình</strong>, <strong>độ nghiêng</strong>, bật <strong>quay quanh</strong> hoặc chế độ <strong>quả cầu</strong>.</p>
+                </div>
+                <div class="mini">
+                    <h3>📍 Địa danh</h3>
+                    <p>Nhấp vào các điểm vàng (đỉnh núi), xanh dương (thành phố), xanh ngọc (đảo) để bay tới và xem thông tin.</p>
+                </div>
+            </div>
         </div>
 
         <!-- Kêu gọi hành động -->
@@ -102,6 +215,28 @@
     <footer>
         <p>&copy; 2025 Viet5ers. Powered by GitHub Pages.</p>
     </footer>
+
+    <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+    <script src="assets/terrain3d.js"></script>
+    <script>
+        /* Khởi tạo bản đồ 3D ngay trên trang chủ */
+        (function () {
+            function boot() {
+                if (!window.VN3D) { return; }
+                window.vn3d = window.VN3D.init({
+                    container: 'map3d',
+                    panel: 'map3d-panel',
+                    hint: 'map3d-hint',
+                    basemap: 'sat'
+                });
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', boot);
+            } else {
+                boot();
+            }
+        })();
+    </script>
 
 </body>
 </html>
