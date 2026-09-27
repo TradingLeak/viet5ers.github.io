@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Bản đồ địa hình Việt Nam tương tác: bóng địa hình, phân tầng độ cao, đỉnh núi, thành phố, biển đảo và mặt cắt địa hình.">
+<title>Bản đồ địa hình Việt Nam — Viet5ers</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<style>
+  :root{
+    --bg:#121212;
+    --panel:#1b1b1b;
+    --card:#1e1e1e;
+    --card-2:#232323;
+    --line:#2e2e2e;
+    --gold:#d4af37;
+    --gold-dim:#8a7326;
+    --text:#e6e6e6;
+    --muted:#9d9d9d;
+    --green:#4e9e5c;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.55;
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+
+  /* ---------- Header ---------- */
+  header.site{
+    background:var(--panel);border-bottom:3px solid var(--gold);
+    padding:10px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;z-index:20;
+  }
+  header.site h1{margin:0;color:var(--gold);font-size:1.25rem;letter-spacing:.4px}
+  header.site .sub{font-style:italic;color:var(--muted);font-size:.85rem}
+  header.site nav{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  header.site nav button{
+    background:#262626;color:var(--text);border:1px solid var(--line);
+    border-radius:6px;padding:6px 11px;font-size:.82rem;cursor:pointer;font-family:inherit;
+  }
+  header.site nav button:hover{border-color:var(--gold);color:var(--gold)}
+  header.site nav a.back{
+    color:var(--muted);text-decoration:none;font-size:.82rem;padding:6px 4px;
+    border-bottom:1px dashed transparent;
+  }
+  header.site nav a.back:hover{color:var(--gold);border-color:var(--gold)}
+
+  /* ---------- Layout ---------- */
+  #app{flex:1;display:flex;min-height:0;position:relative}
+  #sidebar{
+    width:372px;flex:0 0 372px;background:var(--card);border-right:1px solid var(--line);
+    overflow-y:auto;padding:14px;scrollbar-width:thin;
+  }
+  #sidebar::-webkit-scrollbar{width:9px}
+  #sidebar::-webkit-scrollbar-thumb{background:#3a3a3a;border-radius:5px}
+  #mapwrap{flex:1;position:relative;min-width:0}
+  #map{position:absolute;inset:0;background:#0b1410}
+
+  /* ---------- Panels ---------- */
+  .card{
+    background:var(--card-2);border:1px solid var(--line);border-radius:8px;
+    padding:12px 13px;margin-bottom:12px;
+  }
+  .card h2{
+    margin:0 0 9px;font-size:.98rem;color:#fff;border-left:4px solid var(--gold);
+    padding-left:9px;letter-spacing:.2px;
+  }
+  .card h3{margin:14px 0 7px;font-size:.85rem;color:var(--gold);text-transform:uppercase;letter-spacing:.6px}
+  .card h3:first-child{margin-top:0}
+  .card p{margin:0 0 8px;font-size:.86rem;color:#cfcfcf}
+  .muted{color:var(--muted);font-size:.78rem}
+  ul.facts{margin:0;padding-left:18px;font-size:.85rem;color:#cfcfcf}
+  ul.facts li{margin-bottom:5px}
+  ul.facts b{color:var(--gold)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{
+    background:#2a2a2a;border:1px solid var(--line);color:#d8d8d8;border-radius:20px;
+    padding:4px 11px;font-size:.78rem;cursor:pointer;font-family:inherit;transition:.15s;
+  }
+  .chip:hover{border-color:var(--gold);color:var(--gold)}
+  .chip.active{background:var(--gold);border-color:var(--gold);color:#111;font-weight:600}
+  .btn{
+    display:inline-block;background:var(--gold);color:#111;border:none;border-radius:6px;
+    padding:8px 14px;font-weight:600;font-size:.83rem;cursor:pointer;font-family:inherit;
+  }
+  .btn:hover{background:#b3922b}
+  .btn.ghost{background:#2a2a2a;color:#ddd;border:1px solid var(--line);font-weight:500}
+  .btn.ghost:hover{border-color:var(--gold);color:var(--gold);background:#2a2a2a}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+
+  /* ---------- Legend ---------- */
+  .legend-bar{
+    height:14px;border-radius:3px;border:1px solid #00000066;
+    background:linear-gradient(90deg,#2e7d5b 0%,#4e9e5c 12%,#8fc06a 30%,#d8d274 48%,#e0a95c 64%,#cc7742 78%,#a8472f 90%,#8d3a3f 100%);
+  }
+  .legend-scale{display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);margin-top:3px}
+  .legend-note{font-size:.72rem;color:var(--muted);margin-top:6px}
+
+  /* ---------- Profile ---------- */
+  #profile-empty{font-size:.82rem;color:var(--muted)}
+  #profileBox{display:none}
+  #profileBox.on{display:block}
+  #profileStats{font-size:.78rem;color:#cfcfcf;margin:8px 0 4px;display:flex;flex-wrap:wrap;gap:4px 12px}
+  #profileStats b{color:var(--gold)}
+  canvas#profileChart{width:100%;height:172px;display:block;border-radius:6px;background:#151515;border:1px solid var(--line)}
+  #profileTitle{font-size:.85rem;color:#fff;margin:0 0 4px;font-weight:600}
+  .spinner{
+    display:inline-block;width:11px;height:11px;border:2px solid #ffffff33;border-top-color:var(--gold);
+    border-radius:50%;animation:spin .7s linear infinite;vertical-align:-1px;margin-right:5px;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ---------- Leaflet overrides (dark theme) ---------- */
+  .leaflet-container{background:#0b1410;font-family:inherit}
+  .leaflet-control-attribution{
+    background:rgba(18,18,18,.82)!important;color:#9d9d9d!important;font-size:10px!important;
+  }
+  .leaflet-control-attribution a{color:var(--gold)!important}
+  .leaflet-bar a,.leaflet-bar a:hover{
+    background:#1e1e1e!important;color:#e6e6e6!important;border-bottom-color:#2e2e2e!important;
+  }
+  .leaflet-bar a:hover{color:var(--gold)!important}
+  .leaflet-control-layers{
+    background:rgba(24,24,24,.95)!important;color:#e6e6e6;border:1px solid #2e2e2e!important;
+    border-radius:8px!important;box-shadow:0 4px 14px rgba(0,0,0,.5)!important;padding:8px 10px!important;
+  }
+  .leaflet-control-layers-list{font-size:12.5px}
+  .leaflet-control-layers-group-name{color:var(--gold);font-weight:700;font-size:12px;margin:2px 0 4px}
+  .leaflet-control-layers label{margin:2px 0}
+  .leaflet-control-layers-selector{accent-color:var(--gold)}
+  .leaflet-tooltip{
+    background:rgba(18,18,18,.92);border:1px solid #3a3a3a;color:#e6e6e6;
+    border-radius:5px;font-size:12px;box-shadow:0 3px 10px rgba(0,0,0,.5);
+  }
+  .leaflet-tooltip-top:before{border-top-color:#3a3a3a}
+  .leaflet-tooltip-bottom:before{border-bottom-color:#3a3a3a}
+  .leaflet-tooltip-left:before{border-left-color:#3a3a3a}
+  .leaflet-tooltip-right:before{border-right-color:#3a3a3a}
+  .leaflet-popup-content-wrapper,.leaflet-popup-tip{
+    background:#1e1e1e;color:#e6e6e6;border:1px solid #333;box-shadow:0 6px 20px rgba(0,0,0,.6);
+  }
+  .leaflet-popup-content{margin:11px 13px;font-size:.83rem;line-height:1.5}
+  .leaflet-popup-content h4{margin:0 0 5px;color:var(--gold);font-size:.9rem}
+  .leaflet-popup-content .k{color:#9d9d9d}
+  .leaflet-popup-close-button{color:#999!important}
+
+  /* ---------- Custom markers ---------- */
+  .marker{position:relative}
+  .peak-wrap{position:relative;width:0;height:0}
+  .peak-dot{
+    position:absolute;left:-5px;top:-5px;width:10px;height:10px;transform:rotate(45deg);
+    background:var(--gold);border:1.5px solid #1b1b1b;box-shadow:0 0 6px rgba(212,175,55,.7);
+  }
+  .peak-label{
+    position:absolute;left:0;top:0;transform:translate(-50%,-190%);white-space:nowrap;
+    background:rgba(18,18,18,.86);border:1px solid rgba(212,175,55,.55);color:#efe6c9;
+    font-size:10.5px;line-height:1.25;padding:2px 6px;border-radius:4px;pointer-events:none;
+  }
+  .peak-label b{color:var(--gold);margin-left:4px}
+  .map.lowzoom .peak-label{display:none}
+  .city-dot{
+    width:9px;height:9px;border-radius:50%;background:#7fd4ff;border:1.5px solid #06222f;
+    box-shadow:0 0 6px rgba(127,212,255,.6);
+  }
+  .city-dot.major{width:12px;height:12px;background:#ffd76a;border-color:#3a2a00;box-shadow:0 0 8px rgba(255,215,106,.75)}
+  .island-dot{
+    width:9px;height:9px;border-radius:2px;background:#59e0c8;border:1.5px solid #062b26;transform:rotate(45deg);
+  }
+  .park-dot{
+    width:10px;height:10px;border-radius:50%;background:#7ddf7d;border:1.5px solid #06250a;
+  }
+  .pin-me{
+    width:14px;height:14px;border-radius:50%;background:var(--gold);border:2px solid #000;
+    box-shadow:0 0 10px rgba(212,175,55,.9);
+  }
+
+  /* ---------- Floating bits over the map ---------- */
+  .readout{
+    background:rgba(18,18,18,.88);border:1px solid #333;border-radius:8px;
+    padding:6px 10px;font-size:11.5px;color:#cfcfcf;line-height:1.5;pointer-events:none;
+  }
+  .readout b{color:var(--gold);font-weight:600}
+  #toast{
+    position:absolute;left:50%;top:14px;transform:translateX(-50%) translateY(-14px);
+    background:rgba(24,24,24,.96);border:1px solid var(--gold);color:#eee;border-radius:8px;
+    padding:9px 14px;font-size:.83rem;max-width:80%;text-align:center;opacity:0;
+    transition:.28s;pointer-events:none;z-index:900;box-shadow:0 6px 22px rgba(0,0,0,.6);
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .hint{
+    position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:800;
+    background:rgba(18,18,18,.92);border:1px solid var(--gold);color:#eee;border-radius:20px;
+    padding:6px 14px;font-size:.78rem;display:none;
+  }
+  .hint.on{display:block}
+  .hint b{color:var(--gold)}
+
+  /* ---------- Mobile ---------- */
+  @media (max-width:900px){
+    body{overflow:auto;height:auto}
+    #app{flex-direction:column}
+    #mapwrap{height:62vh;flex:none;order:1}
+    #sidebar{width:auto;flex:none;order:2;border-right:none;border-top:1px solid var(--line)}
+    header.site h1{font-size:1.05rem}
+    header.site .sub{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <h1>Bản đồ địa hình Việt Nam</h1>
+  <span class="sub">Phân tầng độ cao · Bóng địa hình · Mặt cắt địa hình</span>
+  <nav>
+    <button id="btnFull" type="button">⛶ Toàn màn hình</button>
+    <button id="btnReset" type="button">⟲ Về toàn quốc</button>
+    <a class="back" href="index.html">← Viet5ers</a>
+  </nav>
+</header>
+
+<div id="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside id="sidebar">
+
+    <div class="card">
+      <h2>Tổng quan địa hình</h2>
+      <p class="muted">Việt Nam nằm ở rìa đông bán đảo Đông Dương, địa hình đa dạng bậc nhất Đông Nam Á.</p>
+      <ul class="facts">
+        <li><b>¾ diện tích</b> là đồi núi, chỉ khoảng ¼ là đồng bằng.</li>
+        <li>Đỉnh cao nhất: <b>Fansipan 3.143 m</b> (Hoàng Liên Sơn, Lào Cai).</li>
+        <li>Hai hướng núi chính: <b>Tây Bắc – Đông Nam</b> (Hoàng Liên Sơn, Trường Sơn) và <b>vòng cung</b> (Đông Bắc).</li>
+        <li>Nghiêng dốc về phía đông – đông nam, đổ ra Biển Đông.</li>
+        <li>Hai đồng bằng lớn: <b>sông Hồng</b> (~15.000 km²) và <b>sông Cửu Long</b> (~40.000 km²).</li>
+        <li>Tây Nguyên là các cao nguyên badan: Pleiku, Đắk Lắk, Mơ Nông, Lâm Viên, Di Linh (400–800 m).</li>
+        <li>Bờ biển dài ~<b>3.260 km</b> với hơn 4.000 hòn đảo lớn nhỏ.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Phân tầng độ cao (m)</h2>
+      <div class="legend-bar"></div>
+      <div class="legend-scale">
+        <span>0</span><span>200</span><span>500</span><span>1.000</span><span>2.000</span><span>3.000+</span>
+      </div>
+      <p class="legend-note">Màu càng vàng – đỏ – nâu thì địa hình càng cao; xanh đậm là đồng bằng, đầm lầy ven biển và đồng bằng sông Cửu Long.</p>
+    </div>
+
+    <div class="card">
+      <h2>Bay nhanh tới vùng</h2>
+      <div class="chips" id="regionChips"></div>
+    </div>
+
+    <div class="card">
+      <h2>Tra cứu độ cao tại điểm</h2>
+      <p class="muted">Nhấp chuột vào bất kỳ vị trí nào trên bản đồ để xem tọa độ và độ cao so với mực nước biển.</p>
+      <div id="pointResult" style="font-size:.84rem;color:#cfcfcf">Chưa chọn điểm nào.</div>
+    </div>
+
+    <div class="card">
+      <h2>Mặt cắt địa hình</h2>
+      <p class="muted">Vẽ biểu đồ độ cao dọc một tuyến. Chọn tuyến có sẵn hoặc tự vẽ bằng 2 điểm trên bản đồ.</p>
+      <div class="chips" id="presetChips"></div>
+      <div class="btn-row">
+        <button class="btn ghost" id="btnDraw" type="button">✏️ Tự vẽ (2 điểm)</button>
+        <button class="btn ghost" id="btnClearProfile" type="button">✕ Xoá mặt cắt</button>
+      </div>
+      <div id="profileEmpty" class="muted" style="margin-top:9px">Chưa có mặt cắt.</div>
+      <div id="profileBox">
+        <p id="profileTitle"></p>
+        <canvas id="profileChart"></canvas>
+        <div id="profileStats"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Lớp bản đồ &amp; nguồn dữ liệu</h2>
+      <p class="muted">Bật/tắt lớp ở biểu tượng <b style="color:var(--gold)">⊞</b> góc phải bản đồ. Nền mặc định là <b style="color:var(--gold)">OpenTopoMap</b> (địa hình + đường đồng mức), có thể chuyển sang bóng địa hình, bản đồ vật lý, vệ tinh hoặc bản đồ nền Esri.</p>
+      <p class="muted" style="margin-top:8px">
+        <b style="color:var(--gold)">Dữ liệu độ cao:</b> mặc định lấy từ API OpenTopoData (SRTM 30 m – NASA/USGS);
+        nếu API bận sẽ tự chuyển sang giải mã tile DEM Terrarium (AWS Open Data – Mapzen/Joerd) ngay trong trình duyệt,
+        cuối cùng là Open-Elevation. Việc tra độ cao tại một điểm dùng tile DEM trước cho nhanh và không tốn hạn mức API.
+        Trang cần Internet để tải lớp nền và dữ liệu độ cao.
+      </p>
+    </div>
+
+  </aside>
+
+  <!-- ============ MAP ============ -->
+  <main id="mapwrap">
+    <div id="map" class="map lowzoom"></div>
+    <div id="toast"></div>
+    <div class="hint" id="hint">Nhấp điểm <b>thứ nhất</b> của mặt cắt…</div>
+  </main>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* =========================================================================
+   Bản đồ địa hình Việt Nam — Leaflet + OpenTopoMap + Esri + OpenTopoData
+   Tất cả dữ liệu điểm (đỉnh núi, thành phố, đảo, vườn quốc gia, tuyến mặt cắt)
+   được khai báo ngay trong file để trang chạy độc lập.
+   ========================================================================= */
+(function () {
+  'use strict';
+
+  if (typeof L === 'undefined') {
+    document.getElementById('map').innerHTML =
+      '<div style="padding:24px;color:#d4af37;font-size:.95rem">Không tải được thư viện Leaflet (cần Internet). Vui lòng kiểm tra kết nối rồi tải lại trang.</div>';
+    return;
+  }
+
+  /* ------------------------------- Dữ liệu ------------------------------- */
+
+  var PEAKS = [
+    { n:'Fansipan',                 e:3143, lat:22.3033, lng:103.7750, p:'Lào Cai (Hoàng Liên Sơn)', note:'Mái nhà Đông Dương' },
+    { n:'Pu Si Lung',               e:3076, lat:22.5167, lng:102.9167, p:'Lai Châu – biên giới Trung Quốc' },
+    { n:'Putaleng',                 e:3049, lat:22.4275, lng:103.4069, p:'Lai Châu' },
+    { n:'Kỳ Quan San (Bạch Mộc Lương Tử)', e:3046, lat:22.5083, lng:103.6103, p:'Lào Cai – Lai Châu' },
+    { n:'Tả Liên Sơn',              e:2996, lat:22.3833, lng:103.5833, p:'Lai Châu' },
+    { n:'Tà Xùa',                   e:2865, lat:21.3908, lng:104.3214, p:'Sơn La – Yên Bái' },
+    { n:'Ngọc Linh',                e:2598, lat:15.0611, lng:107.9838, p:'Kon Tum – Quảng Nam', note:'Đỉnh cao nhất Nam Trường Sơn' },
+    { n:'Phu Hoạt',                 e:2452, lat:19.2397, lng:104.5842, p:'Nghệ An' },
+    { n:'Tây Côn Lĩnh',             e:2419, lat:22.8333, lng:104.9167, p:'Hà Giang' },
+    { n:'Chư Yang Sin',             e:2405, lat:12.4000, lng:108.4167, p:'Đắk Lắk' },
+    { n:'Kiều Liêu Ti',             e:2402, lat:22.7200, lng:104.2900, p:'Hà Giang – Tuyên Quang' },
+    { n:'Langbiang',                e:2167, lat:12.0417, lng:108.4331, p:'Lâm Đồng', note:'Cao nguyên Lâm Viên' },
+    { n:'Phia Oắc',                 e:1931, lat:22.6167, lng:105.8500, p:'Cao Bằng' },
+    { n:'Tam Đảo',                  e:1590, lat:21.4550, lng:105.6444, p:'Vĩnh Phúc – Thái Nguyên – Tuyên Quang' },
+    { n:'Mẫu Sơn',                  e:1541, lat:21.8500, lng:106.9333, p:'Lạng Sơn' },
+    { n:'Bà Nà (Núi Chúa)',         e:1487, lat:15.9972, lng:107.9889, p:'Đà Nẵng' },
+    { n:'Bạch Mã',                  e:1450, lat:16.1942, lng:107.8575, p:'Huế' },
+    { n:'Bà Đen',                   e:986,  lat:11.3667, lng:106.1667, p:'Tây Ninh', note:'Đỉnh cao nhất Đông Nam Bộ' },
+    { n:'Hải Vân',                  e:496,  lat:16.1917, lng:108.1306, p:'Huế – Đà Nẵng' }
+  ];
+
+  var CITIES = [
+    ['Hà Nội',21.0278,105.8342,1], ['Hải Phòng',20.8449,106.6881,1], ['TP.HCM',10.7769,106.7009,1],
+    ['Cần Thơ',10.0452,105.7469,1], ['Đà Nẵng',16.0544,108.2022,1],
+    ['Việt Trì',21.3227,105.4016], ['Thái Nguyên',21.5928,105.8444], ['Lào Cai',22.4809,103.9757],
+    ['Sa Pa',22.3364,103.8438], ['Yên Bái',21.7167,104.9000], ['Điện Biên Phủ',21.3860,103.0230],
+    ['Sơn La',21.3270,103.9141], ['Hà Giang',22.8233,104.9836], ['Cao Bằng',22.6657,106.2570],
+    ['Lạng Sơn',21.8537,106.7610], ['Hạ Long',20.9500,107.0833], ['Nam Định',20.4200,106.1683],
+    ['Thanh Hóa',19.8067,105.7850], ['Vinh',18.6796,105.6813], ['Hà Tĩnh',18.3400,105.9000],
+    ['Đồng Hới',17.4683,106.6061], ['Huế',16.4637,107.5909], ['Tam Kỳ',15.5667,108.4833],
+    ['Quảng Ngãi',15.1200,108.8000], ['Quy Nhơn',13.7829,109.2196], ['Tuy Hòa',13.0955,109.3207],
+    ['Nha Trang',12.2388,109.1967], ['Phan Rang',11.5667,108.9833], ['Phan Thiết',10.9333,108.1000],
+    ['Đà Lạt',11.9404,108.4583], ['Buôn Ma Thuột',12.6667,108.0500], ['Pleiku',13.9833,108.0000],
+    ['Kon Tum',14.3497,108.0005], ['Biên Hòa',10.9500,106.8167], ['Vũng Tàu',10.3460,107.0843],
+    ['Mỹ Tho',10.3600,106.3650], ['Rạch Giá',10.0125,105.0808], ['Long Xuyên',10.3860,105.4350],
+    ['Cà Mau',9.1769,105.1500]
+  ];
+
+  var ISLANDS = [
+    ['Quần đảo Hoàng Sa',16.5000,112.0000,'vị trí tham khảo (khu vực quần đảo)'],
+    ['Quần đảo Trường Sa',9.5000,114.0000,'vị trí tham khảo (khu vực quần đảo)'],
+    ['Phú Quốc',10.2300,103.9600,'đảo lớn nhất Việt Nam, ~574 km²'],
+    ['Côn Đảo',8.6833,106.6167,''],
+    ['Cát Bà',20.7833,107.0500,'đảo đá vôi, vịnh Hạ Long – Cát Bà (UNESCO)'],
+    ['Bạch Long Vĩ',20.1333,107.7167,''],
+    ['Lý Sơn',15.3833,109.1167,'đảo núi lửa'],
+    ['Phú Quý',10.5167,108.9333,''],
+    ['Cồn Cỏ',17.1667,107.3333,''],
+    ['Hòn Tre (Nha Trang)',12.2167,109.2500,'']
+  ];
+
+  var PARKS = [
+    ['Vịnh Hạ Long – di sản UNESCO',20.9100,107.1833],
+    ['Phong Nha – Kẻ Bàng – di sản UNESCO',17.5333,106.1167],
+    ['VQG Hoàng Liên',22.3333,103.7667],
+    ['VQG Ba Bể',22.4000,105.6167],
+    ['VQG Cúc Phương',20.2500,105.7167],
+    ['VQG Bạch Mã',16.1900,107.8600],
+    ['VQG Côn Đảo',8.6833,106.6167],
+    ['VQG Kon Ka Kinh',14.3500,108.3500],
+    ['VQG Yok Đôn',12.8333,107.6500],
+    ['VQG Bidoup – Núi Bà',12.1000,108.5000],
+    ['Khu bảo tồn Núi Chúa',11.7000,109.1500],
+    ['VQG Cát Tiên',11.4333,107.4333],
+    ['VQG U Minh Thượng',9.6000,105.0500],
+    ['VQG Tràm Chim',10.7167,105.5333]
+  ];
+
+  var REGIONS = [
+    ['Toàn quốc',16.6,106.6,6],
+    ['Tây Bắc',21.9,103.6,8],
+    ['Đông Bắc',22.4,105.2,8],
+    ['Đồng bằng sông Hồng',20.9,106.2,9],
+    ['Bắc Trung Bộ',17.5,106.0,8],
+    ['Nam Trung Bộ',13.5,109.0,7],
+    ['Tây Nguyên',13.5,108.2,8],
+    ['Đông Nam Bộ',10.9,106.8,8],
+    ['Đồng bằng sông Cửu Long',9.8,105.6,8],
+    ['Hoàng Sa',16.5,112.0,8],
+    ['Trường Sa',9.5,114.0,8]
+  ];
+
+  // Tuyến mặt cắt có sẵn: mảng [lat, lng, nhãn]
+  var PRESETS = [
+    { id:'bacbo', name:'Fansipan → Hà Nội → Hạ Long', pts:[
+        [22.3364,103.8438,'Sa Pa'], [21.0278,105.8342,'Hà Nội'], [20.9500,107.0833,'Hạ Long'] ] },
+    { id:'xuyen-viet', name:'Bắc – Nam: Hà Nội → TP.HCM', pts:[
+        [21.0278,105.8342,'Hà Nội'], [18.6796,105.6813,'Vinh'], [17.4683,106.6061,'Đồng Hới'],
+        [16.4637,107.5909,'Huế'], [16.0544,108.2022,'Đà Nẵng'], [13.7829,109.2196,'Quy Nhơn'],
+        [12.2388,109.1967,'Nha Trang'], [10.9333,108.1000,'Phan Thiết'], [10.7769,106.7009,'TP.HCM'] ] },
+    { id:'taynguyen', name:'Tây Nguyên: Kon Tum → Đà Lạt', pts:[
+        [14.3497,108.0005,'Kon Tum'], [13.9833,108.0000,'Pleiku'],
+        [12.6667,108.0500,'Buôn Ma Thuột'], [11.9404,108.4583,'Đà Lạt'] ] },
+    { id:'dongbac', name:'Đông Bắc: Hà Nội → Hà Giang', pts:[
+        [21.0278,105.8342,'Hà Nội'], [21.5928,105.8444,'Thái Nguyên'],
+        [22.4000,105.6167,'Ba Bể'], [22.8233,104.9836,'Hà Giang'] ] },
+    { id:'mekong', name:'ĐBSCL: TP.HCM → Cà Mau', pts:[
+        [10.7769,106.7009,'TP.HCM'], [10.3600,106.3650,'Mỹ Tho'],
+        [10.0452,105.7469,'Cần Thơ'], [9.1769,105.1500,'Cà Mau'] ] }
+  ];
+
+  /* ------------------------------- Bản đồ ------------------------------- */
+
+  var VN_BOUNDS = [[-1.0, 93.0], [29.5, 126.0]];   // giới hạn kéo bản đồ
+  var VN_CENTER = [16.6, 106.6];
+
+  var map = L.map('map', {
+    center: VN_CENTER,
+    zoom: window.innerWidth < 900 ? 5 : 6,
+    minZoom: 4,
+    maxZoom: 17,
+    maxBounds: VN_BOUNDS,
+    maxBoundsViscosity: 0.7,
+    zoomControl: true,
+    worldCopyJump: false,
+    attributionControl: true
+  });
+  window.__map = map; // tiện cho việc kiểm tra
+
+  var ATTR_ESRI = 'Tiles &copy; <a href="https://www.esri.com/">Esri</a> — Esri, Maxar, Earthstar Geographics, USGS, NOAA';
+  var attrOSM  = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+  /* Nền bản đồ: dùng tile địa hình phân tầng độ cao + bóng địa hình */
+  var baseTerrain = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    maxZoom: 17, maxNativeZoom: 17, attribution: attrOSM + ', <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)', crossOrigin: true
+  }).addTo(map);
+
+  var baseHillshade = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 17, maxNativeZoom: 16, attribution: 'Bóng địa hình — ' + ATTR_ESRI
+  });
+  var basePhysical = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 10, maxNativeZoom: 8, attribution: 'Bản đồ vật lý — ' + ATTR_ESRI
+  });
+  var baseImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 17, maxNativeZoom: 17, attribution: 'Ảnh vệ tinh — ' + ATTR_ESRI
+  });
+  var baseEsriTerrain = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 13, maxNativeZoom: 13, attribution: 'Nền địa hình — ' + ATTR_ESRI
+  });
+
+  var ovLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 17, maxNativeZoom: 17, attribution: 'Địa danh & biên giới — ' + ATTR_ESRI
+  });
+
+  /* Nếu OpenTopoMap quá tải / bị chặn -> tự chuyển sang nền dự phòng */
+  var tileErr = 0;
+  baseTerrain.on('tileerror', function () {
+    if (++tileErr === 12 && map.hasLayer(baseTerrain)) {
+      map.removeLayer(baseTerrain); map.addLayer(baseEsriTerrain);
+      toast('Không tải được OpenTopoMap, đã chuyển sang nền địa hình dự phòng (Esri).');
+    }
+  });
+
+  /* --------------------------- Marker: đỉnh núi --------------------------- */
+  var peaksLayer = L.layerGroup().addTo(map);
+  PEAKS.forEach(function (p) {
+    var icon = L.divIcon({
+      className: 'marker', iconSize: [0, 0],
+      html: '<div class="peak-wrap"><span class="peak-dot"></span>' +
+            '<span class="peak-label">' + p.n + '<b>' + p.e.toLocaleString('vi-VN') + ' m</b></span></div>'
+    });
+    L.marker([p.lat, p.lng], { icon: icon, keyboard: false })
+      .bindPopup('<h4>▲ ' + p.n + '</h4>' +
+                 '<div><span class="k">Độ cao:</span> <b>' + p.e.toLocaleString('vi-VN') + ' m</b></div>' +
+                 '<div><span class="k">Vị trí:</span> ' + p.p + '</div>' +
+                 (p.note ? '<div><span class="k">Ghi chú:</span> ' + p.note + '</div>' : ''))
+      .bindTooltip(p.n + ' · ' + p.e + ' m')
+      .addTo(peaksLayer);
+  });
+
+  /* --------------------------- Marker: thành phố -------------------------- */
+  var citiesLayer = L.layerGroup().addTo(map);
+  CITIES.forEach(function (c) {
+    L.marker([c[1], c[2]], {
+      icon: L.divIcon({
+        className: 'marker', iconSize: [0, 0],
+        html: '<div class="city-dot' + (c[3] ? ' major' : '') + '"></div>'
+      }),
+      keyboard: false
+    }).bindTooltip(c[0], { direction: 'right', offset: [6, 0] })
+      .bindPopup('<h4>' + c[0] + '</h4><div class="k">Tọa độ: ' + c[1].toFixed(3) + '°N, ' + c[2].toFixed(3) + '°E</div>')
+      .addTo(citiesLayer);
+  });
+
+  /* --------------------------- Marker: đảo / quần đảo --------------------- */
+  var islandsLayer = L.layerGroup().addTo(map);
+  ISLANDS.forEach(function (i) {
+    L.marker([i[1], i[2]], {
+      icon: L.divIcon({ className: 'marker', iconSize: [0, 0], html: '<div class="island-dot"></div>' }),
+      keyboard: false
+    }).bindTooltip(i[0], { direction: 'right', offset: [7, 0] })
+      .bindPopup('<h4>🏝 ' + i[0] + '</h4>' + (i[3] ? '<div class="k">' + i[3] + '</div>' : '') +
+                 '<div class="k">Tọa độ: ' + i[1].toFixed(3) + '°N, ' + i[2].toFixed(3) + '°E</div>')
+      .addTo(islandsLayer);
+  });
+
+  /* --------------------- Marker: vườn quốc gia, di sản -------------------- */
+  var parksLayer = L.layerGroup();
+  PARKS.forEach(function (p) {
+    L.marker([p[1], p[2]], {
+      icon: L.divIcon({ className: 'marker', iconSize: [0, 0], html: '<div class="park-dot"></div>' }),
+      keyboard: false
+    }).bindTooltip(p[0], { direction: 'right', offset: [7, 0] })
+      .bindPopup('<h4>🌿 ' + p[0] + '</h4>')
+      .addTo(parksLayer);
+  });
+
+  /* ------------------------- Ranh giới quốc gia (GeoJSON) ----------------- */
+  var borderLayer = L.layerGroup();
+  var borderLoaded = false;
+  function loadBorder() {
+    if (borderLoaded) return;
+    borderLoaded = true;
+    fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries/VNM.geo.json')
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (gj) {
+        L.geoJSON(gj, {
+          style: { color: '#d4af37', weight: 2.2, opacity: .95, fillColor: '#d4af37', fillOpacity: .045, dashArray: '6 5' }
+        }).addTo(borderLayer);
+      })
+      .catch(function () { toast('Không lấy được lớp ranh giới quốc gia (cần Internet).'); });
+  }
+
+  /* ---------------------------- Điều khiển lớp ---------------------------- */
+  L.control.layers({
+    'Địa hình (OpenTopoMap)': baseTerrain,
+    'Bóng địa hình (Hillshade)': baseHillshade,
+    'Bản đồ vật lý': basePhysical,
+    'Ảnh vệ tinh': baseImagery,
+    'Nền địa hình Esri': baseEsriTerrain
+  }, {
+    'Địa danh & biên giới (Esri)': ovLabels,
+    'Đỉnh núi': peaksLayer,
+    'Thành phố': citiesLayer,
+    'Biển đảo': islandsLayer,
+    'Vườn quốc gia & di sản': parksLayer,
+    'Ranh giới quốc gia': borderLayer
+  }, { position: 'topright', collapsed: window.innerWidth < 900 }).addTo(map);
+
+  borderLayer.on('add', loadBorder);
+
+  /* ------------------------------ Thang tỉ lệ ----------------------------- */
+  L.control.scale({ position: 'bottomright', imperial: false, metric: true }).addTo(map);
+
+  /* --------------------------- Ô đọc tọa độ ------------------------------- */
+  var readout = L.control({ position: 'bottomleft' });
+  readout.onAdd = function () {
+    var div = L.DomUtil.create('div', 'readout');
+    div.innerHTML = '<div><span class="k">Lat</span> <b id="roLat">—</b> · <span class="k">Lng</span> <b id="roLng">—</b> · ' +
+                    '<span class="k">Zoom</span> <b id="roZoom">' + map.getZoom() + '</b></div>' +
+                    '<div><span class="k">Độ cao</span> <b id="roElev">nhấp để tra</b></div>';
+    return div;
+  };
+  readout.addTo(map);
+
+  map.on('mousemove', function (e) {
+    document.getElementById('roLat').textContent = e.latlng.lat.toFixed(4);
+    document.getElementById('roLng').textContent = e.latlng.lng.toFixed(4);
+  });
+  map.on('zoomend', function () {
+    document.getElementById('roZoom').textContent = map.getZoom();
+    document.getElementById('map').classList.toggle('lowzoom', map.getZoom() < 7);
+  });
+
+  /* Nhãn đỉnh núi chỉ hiện khi zoom >= 7 để đỡ rối */
+  document.getElementById('map').classList.toggle('lowzoom', map.getZoom() < 7);
+
+  /* ------------------------------ Toast ----------------------------------- */
+  var toastEl = document.getElementById('toast'), toastTimer = null;
+  function toast(msg, ms) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, ms || 4200);
+  }
+
+  /* ======================= ENGINE TRA CỨU ĐỘ CAO ==========================
+     1) Terrarium DEM tiles (AWS Open Data – Mapzen/Joerd): lấy độ cao trực tiếp
+        trong trình duyệt, độ phân giải tới ~12–30 m, không giới hạn số lần gọi.
+     2) Dự phòng: API OpenTopoData (SRTM 30 m) -> Open-Elevation.
+     Ứng dụng: nhấp 1 điểm để tra độ cao + vẽ mặt cắt địa hình.
+     ======================================================================= */
+  var TERRARIUM = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png';
+  var tilePromises = {}, tileData = {};
+
+  function loadTileData(z, x, y) {
+    var key = z + '/' + x + '/' + y;
+    if (tileData[key]) return Promise.resolve(tileData[key]);
+    if (tilePromises[key]) return tilePromises[key];
+    var p = new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      var to = setTimeout(function () { reject(new Error('timeout')); }, 9000);
+      img.onload = function () {
+        clearTimeout(to);
+        try {
+          var c = document.createElement('canvas');
+          c.width = 256; c.height = 256;
+          var cx = c.getContext('2d');
+          cx.drawImage(img, 0, 0);
+          var d = cx.getImageData(0, 0, 256, 256).data; // sẽ ném lỗi nếu canvas bị "taint" (thiếu CORS)
+          tileData[key] = d;
+          resolve(d);
+        } catch (err) { reject(err); }
+      };
+      img.onerror = function () { clearTimeout(to); reject(new Error('tile error')); };
+      img.src = TERRARIUM.replace('{z}', z).replace('{x}', x).replace('{y}', y);
+    });
+    tilePromises[key] = p;
+    return p;
+  }
+
+  /* Tính tile + pixel cho từng điểm ở một mức zoom */
+  function buildTileItems(points, zoom) {
+    var n = Math.pow(2, zoom);
+    return points.map(function (p, i) {
+      var fx = (p.lng + 180) / 360 * n;
+      var r = p.lat * Math.PI / 180;
+      var fy = (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * n;
+      var tx = Math.floor(fx), ty = Math.floor(fy);
+      return {
+        i: i, key: zoom + '/' + tx + '/' + ty,
+        px: Math.min(255, Math.max(0, Math.floor((fx - tx) * 256))),
+        py: Math.min(255, Math.max(0, Math.floor((fy - ty) * 256)))
+      };
+    });
+  }
+  function uniqueKeys(items) {
+    var seen = {}, out = [];
+    items.forEach(function (it) { if (!seen[it.key]) { seen[it.key] = 1; out.push(it.key); } });
+    return out;
+  }
+
+  /* Lấy mẫu độ cao từ tile Terrarium. Trả về Promise<number[]|null>
+     Tự hạ zoom nếu tuyến dài khiến số tile cần tải quá nhiều (giữ tối đa ~48 tile). */
+  function sampleTerrarium(points, zoom) {
+    zoom = zoom || 12;
+    var items = buildTileItems(points, zoom);
+    var guard = 0;
+    while (uniqueKeys(items).length > 48 && zoom > 7 && guard++ < 8) {
+      zoom -= 1;
+      items = buildTileItems(points, zoom);
+    }
+    var keys = uniqueKeys(items);
+
+    return Promise.all(keys.map(function (k) {
+      var s = k.split('/');
+      return loadTileData(+s[0], +s[1], +s[2])
+        .then(function (d) { return { k: k, d: d }; })
+        .catch(function () { return { k: k, d: null }; });
+    })).then(function (res) {
+      var byKey = {};
+      res.forEach(function (r) { byKey[r.k] = r.d; });
+      var out = new Array(points.length), ok = 0;
+      items.forEach(function (it) {
+        var d = byKey[it.key];
+        if (!d) { out[it.i] = null; return; }
+        var o = (it.py * 256 + it.px) * 4;
+        out[it.i] = (d[o] * 256 + d[o + 1] + d[o + 2] / 256) - 32768;  // giải mã Terrarium
+        ok++;
+      });
+      if (ok < points.length * 0.6) return null;   // quá nhiều điểm lỗi -> chuyển sang API
+      /* lấp các điểm lỗi lẻ tẻ bằng giá trị hợp lệ gần nhất */
+      var last = null;
+      for (var i = 0; i < out.length; i++) {
+        if (out[i] === null) out[i] = last; else last = out[i];
+      }
+      for (var j = out.length - 1; j >= 0; j--) {
+        if (out[j] === null) out[j] = out[j + 1] || 0;
+      }
+      return out;
+    }).catch(function () { return null; });
+  }
+
+  /* --------------------- Dự phòng: API độ cao SRTM ------------------------ */
+  var lastCall = 0, callChain = Promise.resolve();
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  /* fetch kèm timeout (tránh treo vô hạn khi API chậm) */
+  function fetchWithTimeout(url, opts, ms) {
+    opts = opts || {};
+    if (typeof AbortController !== 'undefined') {
+      var ac = new AbortController();
+      opts.signal = ac.signal;
+      var to = setTimeout(function () { try { ac.abort(); } catch (e) {} }, ms || 9000);
+      return fetch(url, opts).then(function (r) { clearTimeout(to); return r; },
+                                   function (e) { clearTimeout(to); throw e; });
+    }
+    return fetch(url, opts);
+  }
+
+  /* Gọi API độ cao (OpenTopoData – SRTM, dự phòng Open-Elevation) */
+  function lookupElevations(points) {
+    var q = points.map(function (p) { return p.lat.toFixed(5) + ',' + p.lng.toFixed(5); }).join('|');
+    var url = 'https://api.opentopodata.org/v1/srtm30m?locations=' + encodeURIComponent(q);
+    return fetchWithTimeout(url, null, 9000).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function (j) {
+      if (j.status !== 'OK' || !j.results) throw new Error(j.error || 'Lỗi API');
+      return j.results.map(function (x) { return x.elevation; });
+    }).catch(function () {
+      // Dự phòng 2: Open-Elevation
+      return fetchWithTimeout('https://api.open-elevation.com/api/v1/lookup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ locations: points.map(function (p) { return { latitude: p.lat, longitude: p.lng }; }) })
+      }, 9000).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      }).then(function (j) {
+        if (!j.results) throw new Error('Lỗi API');
+        return j.results.map(function (x) { return x.elevation; });
+      });
+    });
+  }
+
+  /* Xếp hàng gọi API (OpenTopoData công khai giới hạn 1 req/giây) */
+  function queuedLookup(points) {
+    callChain = callChain.then(function () {
+      var wait = Math.max(0, 1150 - (Date.now() - lastCall));
+      return sleep(wait).then(function () {
+        lastCall = Date.now();
+        return lookupElevations(points);
+      });
+    });
+    return callChain;
+  }
+
+  /* Trả về null nếu lỗi, không làm chết chuỗi promise */
+  function safeLookup(points) {
+    return queuedLookup(points).catch(function () {
+      callChain = Promise.resolve();
+      return null;
+    });
+  }
+
+  /* Chiến lược A (1 điểm hoặc tuyến ngắn): tile DEM trước -> nhanh, không tốn quota API.
+     Chiến lược B (tuyến dài): gọi API 1 lần cho tất cả điểm (SRTM 30 m, chính xác hơn)
+     -> nếu API lỗi/bận thì quay về tile DEM với zoom hạ thấp cho phù hợp độ dài. */
+  function lookupTilesFirst(points, zoom) {
+    return sampleTerrarium(points, zoom || 12).then(function (v) {
+      return v || safeLookup(points);
+    });
+  }
+  function lookupApiFirst(points, zoom) {
+    return safeLookup(points).then(function (v) {
+      return v || sampleTerrarium(points, zoom || 11);
+    });
+  }
+  /* Chọn zoom tile theo độ dài tuyến (km) để không phải tải quá nhiều tile */
+  function zoomForKm(km) {
+    if (!km || km < 0) return 12;
+    if (km < 80) return 13;
+    if (km < 250) return 12;
+    if (km < 700) return 11;
+    return 10;
+  }
+
+  var elevCache = {};
+  function cachedElev(lat, lng) {
+    var k = lat.toFixed(3) + ',' + lng.toFixed(3);
+    if (k in elevCache) return Promise.resolve(elevCache[k]);
+    return lookupTilesFirst([{ lat: lat, lng: lng }], 13).then(function (r) {
+      if (r && typeof r[0] === 'number') { elevCache[k] = r[0]; return r[0]; }
+      return null;
+    });
+  }
+
+  /* ------------------------- Nhấp chuột: tra độ cao ----------------------- */
+  var meMarker = null;
+  var pointResultEl = document.getElementById('pointResult');
+
+  map.on('click', function (e) {
+    if (drawMode) { handleDrawClick(e.latlng); return; }
+
+    var lat = e.latlng.lat, lng = e.latlng.lng;
+    if (meMarker) map.removeLayer(meMarker);
+    meMarker = L.marker([lat, lng], {
+      icon: L.divIcon({ className: 'marker', iconSize: [0, 0], html: '<div class="pin-me"></div>' })
+    }).addTo(map);
+
+    pointResultEl.innerHTML =
+      'Tọa độ: <b style="color:#d4af37">' + lat.toFixed(4) + '°N, ' + lng.toFixed(4) + '°E</b><br>' +
+      '<span class="muted"><span class="spinner"></span>Đang tra độ cao…</span>';
+
+    cachedElev(lat, lng).then(function (hoverElev) {
+      if (hoverElev === null) {
+        pointResultEl.innerHTML = 'Tọa độ: <b style="color:#d4af37">' + lat.toFixed(4) + '°N, ' + lng.toFixed(4) + '°E</b><br>' +
+          '<span class="muted">Không tra được độ cao (cần Internet / API đang bận).</span>';
+        document.getElementById('roElev').textContent = '—';
+        return;
+      }
+      var txt = hoverElev.toLocaleString('vi-VN') + ' m';
+      document.getElementById('roElev').textContent = txt;
+      var zone = hoverElev < 5 ? 'Đồng bằng / ven biển' : hoverElev < 200 ? 'Đồi thấp, đồng bằng cao' : hoverElev < 800 ? 'Đồi núi thấp' : hoverElev < 1500 ? 'Núi trung bình' : hoverElev < 2500 ? 'Núi cao' : 'Núi rất cao';
+      pointResultEl.innerHTML =
+        'Tọa độ: <b style="color:#d4af37">' + lat.toFixed(4) + '°N, ' + lng.toFixed(4) + '°E</b><br>' +
+        'Độ cao: <b style="color:#d4af37">' + txt + '</b> — ' + zone;
+      if (meMarker) meMarker.bindTooltip('▲ ' + txt, { permanent: false }).openTooltip();
+    });
+  });
+
+  /* =================== MẶT CẮT ĐỊA HÌNH (ELEVATION PROFILE) ============== */
+
+  var drawMode = false, drawA = null, drawB = null, drawLayer = null;
+  var profileLayer = null;
+  var hintEl = document.getElementById('hint');
+  var profileBox = document.getElementById('profileBox');
+  var profileEmpty = document.getElementById('profileEmpty');
+  var profileTitleEl = document.getElementById('profileTitle');
+  var profileStatsEl = document.getElementById('profileStats');
+  var canvas = document.getElementById('profileChart');
+
+  /* Tạo danh sách chip tuyến có sẵn */
+  var presetChips = document.getElementById('presetChips');
+  PRESETS.forEach(function (p) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.textContent = p.name;
+    b.addEventListener('click', function () {
+      stopDraw();
+      Array.prototype.forEach.call(presetChips.children, function (c) { c.classList.remove('active'); });
+      b.classList.add('active');
+      renderProfile(p.pts, p.name);
+    });
+    presetChips.appendChild(b);
+  });
+
+  /* Tạo danh sách chip vùng */
+  var regionChips = document.getElementById('regionChips');
+  REGIONS.forEach(function (r) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.textContent = r[0];
+    b.addEventListener('click', function () {
+      map.flyTo([r[1], r[2]], r[3], { duration: 1.1 });
+      Array.prototype.forEach.call(regionChips.children, function (c) {
+        c.classList.toggle('active', c === b);
+      });
+    });
+    regionChips.appendChild(b);
+  });
+  regionChips.firstChild.classList.add('active');
+
+  /* Nút vẽ tay */
+  var btnDraw = document.getElementById('btnDraw');
+  btnDraw.addEventListener('click', function () {
+    if (drawMode) { stopDraw(); return; }
+    drawMode = true; drawA = drawB = null;
+    btnDraw.classList.add('active');
+    btnDraw.textContent = '✏️ Đang vẽ — nhấp 2 điểm…';
+    if (drawLayer) { map.removeLayer(drawLayer); drawLayer = null; }
+    hintEl.classList.add('on');
+    hintEl.innerHTML = 'Nhấp điểm <b>thứ nhất</b> của mặt cắt…';
+    toast('Chế độ vẽ mặt cắt: nhấp 2 điểm trên bản đồ.');
+  });
+
+  function stopDraw() {
+    drawMode = false;
+    btnDraw.classList.remove('active');
+    btnDraw.textContent = '✏️ Tự vẽ (2 điểm)';
+    hintEl.classList.remove('on');
+  }
+
+  function handleDrawClick(latlng) {
+    if (!drawLayer) { drawLayer = L.layerGroup().addTo(map); }
+    var icon = L.divIcon({ className: 'marker', iconSize: [0, 0], html: '<div class="pin-me"></div>' });
+    if (!drawA) {
+      drawA = latlng; drawB = null;
+      drawLayer.clearLayers();
+      L.marker(latlng, { icon: icon }).addTo(drawLayer);
+      hintEl.innerHTML = 'Nhấp điểm <b>thứ hai</b> để hoàn tất mặt cắt…';
+      return;
+    }
+    if (!drawB) {
+      drawB = latlng;
+      L.marker(latlng, { icon: icon }).addTo(drawLayer);
+      L.polyline([drawA, drawB], { color: '#d4af37', weight: 3, dashArray: '7 6' }).addTo(drawLayer);
+      stopDraw();
+      var nm = 'Tuyến tự vẽ: ' +
+        drawA.lat.toFixed(3) + '°N ' + drawA.lng.toFixed(3) + '°E → ' +
+        drawB.lat.toFixed(3) + '°N ' + drawB.lng.toFixed(3) + '°E';
+      renderProfile([[drawA.lat, drawA.lng, 'Điểm A'], [drawB.lat, drawB.lng, 'Điểm B']], nm);
+      return;
+    }
+    /* Bấm thêm -> bắt đầu tuyến mới */
+    drawA = latlng; drawB = null;
+    drawLayer.clearLayers();
+    L.marker(latlng, { icon: icon }).addTo(drawLayer);
+    hintEl.classList.add('on');
+    hintEl.innerHTML = 'Nhấp điểm <b>thứ hai</b> để hoàn tất mặt cắt…';
+  }
+
+  document.getElementById('btnClearProfile').addEventListener('click', function () {
+    if (profileLayer) { map.removeLayer(profileLayer); profileLayer = null; }
+    profileBox.classList.remove('on');
+    profileEmpty.style.display = '';
+    profileEmpty.textContent = 'Chưa có mặt cắt.';
+    Array.prototype.forEach.call(presetChips.children, function (c) { c.classList.remove('active'); });
+  });
+
+  /* Nội suy tuyến: lấy mẫu đều theo khoảng cách dọc polyline */
+  function resample(pts, n) {
+    var R = 6371, out = [], i, j;
+    function hav(a, b) {
+      var dLat = (b[0] - a[0]) * Math.PI / 180, dLng = (b[1] - a[1]) * Math.PI / 180;
+      var la1 = a[0] * Math.PI / 180, la2 = b[0] * Math.PI / 180;
+      var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      return 2 * R * Math.asin(Math.sqrt(h));
+    }
+    var segs = [], total = 0;
+    for (i = 0; i < pts.length - 1; i++) {
+      var d = hav(pts[i], pts[i + 1]);
+      segs.push(d); total += d;
+    }
+    var step = total / (n - 1);
+    for (i = 0; i < n; i++) {
+      var target = i * step, acc = 0, done = false;
+      for (j = 0; j < segs.length; j++) {
+        if (acc + segs[j] >= target || j === segs.length - 1) {
+          var t = segs[j] ? (target - acc) / segs[j] : 0;
+          t = Math.max(0, Math.min(1, t));
+          out.push({
+            lat: pts[j][0] + (pts[j + 1][0] - pts[j][0]) * t,
+            lng: pts[j][1] + (pts[j + 1][1] - pts[j][1]) * t,
+            km: target
+          });
+          done = true; break;
+        }
+        acc += segs[j];
+      }
+      if (!done) out.push({ lat: pts[pts.length - 1][0], lng: pts[pts.length - 1][1], km: total });
+    }
+    return { samples: out, total: total };
+  }
+
+  var lastProfile = null;
+
+  function renderProfile(pts, title) {
+    var N = 80;                     // ≤ 100 điểm để hợp lệ với API dự phòng
+    var res = resample(pts, N);
+    profileEmpty.style.display = '';
+    profileEmpty.innerHTML = '<span class="spinner"></span>Đang lấy dữ liệu độ cao cho ' + N + ' điểm dọc tuyến…';
+    profileBox.classList.remove('on');
+
+    lookupApiFirst(res.samples.map(function (s) { return { lat: s.lat, lng: s.lng }; }), zoomForKm(res.total))
+      .then(function (elevs) {
+        if (!elevs) {
+          profileEmpty.innerHTML = 'Không lấy được dữ liệu độ cao (nguồn DEM và API đều không phản hồi). ' +
+            'Hãy kiểm tra kết nối Internet rồi thử lại, hoặc vẽ một tuyến ngắn hơn.';
+          return;
+        }
+        lastProfile = { samples: res.samples, elevs: elevs, total: res.total, pts: pts, title: title };
+        profileEmpty.style.display = 'none';
+        profileBox.classList.add('on');
+        profileTitleEl.textContent = title;
+
+        if (profileLayer) { map.removeLayer(profileLayer); profileLayer = null; }
+        profileLayer = L.layerGroup().addTo(map);
+        var line = res.samples.map(function (s) { return [s.lat, s.lng]; });
+        L.polyline(line, { color: '#d4af37', weight: 2.6, opacity: .9 }).addTo(profileLayer);
+        L.marker(line[0], { icon: L.divIcon({ className: 'marker', iconSize: [0, 0], html: '<div class="pin-me"></div>' }) })
+          .bindTooltip('Bắt đầu · ' + Math.round(elevs[0]) + ' m').addTo(profileLayer);
+        L.marker(line[line.length - 1], { icon: L.divIcon({ className: 'marker', iconSize: [0, 0], html: '<div class="pin-me"></div>' }) })
+          .bindTooltip('Kết thúc · ' + Math.round(elevs[elevs.length - 1]) + ' m').addTo(profileLayer);
+        map.fitBounds(L.latLngBounds(line).pad(0.15));
+
+        drawChart();
+        var maxE = Math.max.apply(null, elevs), minE = Math.min.apply(null, elevs);
+        var maxIdx = elevs.indexOf(maxE), minIdx = elevs.indexOf(minE);
+        var nearName = nearestLabel(pts, res.samples[maxIdx]);
+        profileStatsEl.innerHTML =
+          '<span>Dài <b>' + res.total.toFixed(0) + ' km</b></span>' +
+          '<span>Cao nhất <b>' + Math.round(maxE) + ' m</b></span>' +
+          '<span>Thấp nhất <b>' + Math.round(minE) + ' m</b></span>' +
+          '<span>Chênh cao <b>' + Math.round(maxE - minE) + ' m</b></span>' +
+          '<span class="muted">Đỉnh cao nhất ở km thứ ' + res.samples[maxIdx].km.toFixed(0) +
+          (nearName ? ' (gần ' + nearName + ')' : '') + '</span>';
+      });
+  }
+
+  function nearestLabel(pts, sample) {
+    var best = null, bestD = 1e9;
+    for (var i = 0; i < pts.length; i++) {
+      var d = Math.pow(pts[i][0] - sample.lat, 2) + Math.pow(pts[i][1] - sample.lng, 2);
+      if (d < bestD) { bestD = d; best = pts[i][2]; }
+    }
+    /* chỉ nhắc tên điểm gần nhất nếu đủ gần (< ~0.5°) */
+    return (best && bestD < 0.25) ? best : null;
+  }
+
+  /* ------------------------------ Biểu đồ -------------------------------- */
+  function drawChart() {
+    if (!lastProfile) return;
+    var dpr = window.devicePixelRatio || 1;
+    var cssW = canvas.clientWidth || 320, cssH = 172;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    var ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+
+    var P = { l: 42, r: 10, t: 12, b: 24 };
+    var w = cssW - P.l - P.r, h = cssH - P.t - P.b;
+    var elevs = lastProfile.elevs, S = lastProfile.samples, total = lastProfile.total || 1;
+
+    var maxE = Math.max.apply(null, elevs), minE = Math.min.apply(null, elevs);
+    var top = Math.ceil(Math.max(maxE, 100) / 500) * 500;
+    var bot = Math.max(0, Math.floor(Math.min(minE, 0) / 500) * 500);
+    if (top - bot < 500) top = bot + 500;
+
+    function x(i) { return P.l + (i / (S.length - 1)) * w; }
+    function y(v) { return P.t + h - ((v - bot) / (top - bot)) * h; }
+
+    /* lưới ngang + nhãn độ cao */
+    ctx.strokeStyle = '#2c2c2c'; ctx.fillStyle = '#8a8a8a';
+    ctx.font = '10px "Segoe UI",sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    var stepv = (top - bot) / 4;
+    for (var v = bot; v <= top + 1; v += stepv) {
+      var yy = y(v);
+      ctx.beginPath(); ctx.moveTo(P.l, yy); ctx.lineTo(P.l + w, yy); ctx.stroke();
+      ctx.fillText(Math.round(v) + '', P.l - 6, yy);
+    }
+
+    /* vùng tô + đường độ cao */
+    var grad = ctx.createLinearGradient(0, P.t, 0, P.t + h);
+    grad.addColorStop(0, 'rgba(212,175,55,.55)');
+    grad.addColorStop(1, 'rgba(78,158,92,.10)');
+    ctx.beginPath();
+    ctx.moveTo(x(0), y(elevs[0]));
+    for (var i = 1; i < elevs.length; i++) ctx.lineTo(x(i), y(elevs[i]));
+    ctx.lineTo(x(elevs.length - 1), P.t + h);
+    ctx.lineTo(x(0), P.t + h);
+    ctx.closePath();
+    ctx.fillStyle = grad; ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(x(0), y(elevs[0]));
+    for (var j = 1; j < elevs.length; j++) ctx.lineTo(x(j), y(elevs[j]));
+    ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 1.8; ctx.stroke();
+
+    /* đánh dấu điểm cao nhất */
+    var maxIdx = elevs.indexOf(maxE);
+    ctx.beginPath(); ctx.arc(x(maxIdx), y(maxE), 3, 0, Math.PI * 2);
+    ctx.fillStyle = '#ff6b4a'; ctx.fill();
+    ctx.fillStyle = '#ffd9cd'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText(Math.round(maxE) + ' m', x(maxIdx), y(maxE) - 5);
+
+    /* trục hoành: km */
+    ctx.fillStyle = '#8a8a8a'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    var ticks = 4;
+    for (var t = 0; t <= ticks; t++) {
+      var km = (total * t / ticks);
+      var tx = P.l + (w * t / ticks);
+      ctx.beginPath(); ctx.moveTo(tx, P.t + h); ctx.lineTo(tx, P.t + h + 4); ctx.strokeStyle = '#3a3a3a'; ctx.stroke();
+      ctx.fillText(km >= 10 ? Math.round(km) + ' km' : km.toFixed(1) + ' km', Math.min(tx, cssW - 22), P.t + h + 6);
+    }
+
+    /* nhãn điểm mốc (Sa Pa, Hà Nội, …) */
+    if (lastProfile.pts && lastProfile.pts.length >= 2) {
+      ctx.fillStyle = '#cfcfcf'; ctx.font = '10px "Segoe UI",sans-serif'; ctx.textBaseline = 'bottom';
+      lastProfile.pts.forEach(function (p) {
+        if (!p[2]) return;
+        /* tìm vị trí km gần nhất trên tuyến */
+        var bestI = 0, bestD = 1e9;
+        for (var k = 0; k < S.length; k++) {
+          var dd = Math.pow(S[k].lat - p[0], 2) + Math.pow(S[k].lng - p[1], 2);
+          if (dd < bestD) { bestD = dd; bestI = k; }
+        }
+        if (bestD > 0.2) return;
+        var px = x(bestI);
+        ctx.textAlign = px > cssW - 50 ? 'right' : (px < P.l + 40 ? 'left' : 'center');
+        ctx.fillStyle = '#e6c765';
+        ctx.fillText(p[2], px, P.t + h - 3);
+      });
+    }
+  }
+
+  window.addEventListener('resize', drawChart);
+  if (window.ResizeObserver) new ResizeObserver(drawChart).observe(canvas);
+
+  /* --------------------------- Nút toàn màn hình -------------------------- */
+  document.getElementById('btnFull').addEventListener('click', function () {
+    var el = document.documentElement;
+    if (!document.fullscreenElement) {
+      (el.requestFullscreen || el.webkitRequestFullscreen || function () {}).call(el);
+    } else {
+      (document.exitFullscreen || document.webkitExitFullscreen || function () {}).call(document);
+    }
+    setTimeout(function () { map.invalidateSize(); drawChart(); }, 400);
+  });
+
+  /* ------------------------------ Nút reset ------------------------------- */
+  document.getElementById('btnReset').addEventListener('click', function () {
+    map.flyTo(VN_CENTER, window.innerWidth < 900 ? 5 : 6, { duration: 1.0 });
+    Array.prototype.forEach.call(regionChips.children, function (c, i) {
+      c.classList.toggle('active', i === 0);
+    });
+  });
+
+  /* Gợi ý nhanh khi mới mở trang */
+  setTimeout(function () {
+    toast('Nhấp vào bản đồ để tra độ cao · Chọn tuyến có sẵn hoặc bấm “Tự vẽ” để xem mặt cắt địa hình', 7000);
+  }, 900);
+
+  /* Đảm bảo bản đồ vẽ đúng kích thước sau khi tải xong */
+  setTimeout(function () { map.invalidateSize(); }, 300);
+  window.addEventListener('load', function () { map.invalidateSize(); drawChart(); });
+
+})();
+</script>
+</body>
+</html>
