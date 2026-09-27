@@ -169,8 +169,16 @@
     global.__vn3d = map;
 
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true, showCompass: true, showZoom: true }), 'top-right');
-    map.addControl(new maplibregl.ScaleControl({ maxWidth: 110, unit: 'metric' }), 'bottom-right');
     if (maplibregl.FullscreenControl) map.addControl(new maplibregl.FullscreenControl(), 'top-right');
+
+    /* Thước tỉ lệ. Lưu ý: ScaleControl của MapLibre tính khoảng cách ngay khi được thêm vào —
+       nếu lúc đó khung bản đồ chưa có kích thước (container 0×0) thì nó in ra "NaN m".
+       Vì vậy ta gọi lại setUnit() sau khi bản đồ tải xong và sau mỗi lần đổi kích thước. */
+    var scaleCtl = new maplibregl.ScaleControl({ maxWidth: 110, unit: 'metric' });
+    map.addControl(scaleCtl, 'bottom-right');
+    function refreshScale() {
+      try { if (scaleCtl && scaleCtl.setUnit) scaleCtl.setUnit('metric'); } catch (e) {}
+    }
 
     /* --------------------- Nền địa hình + bầu trời ------------------------ */
     function firstSymbolId() {
@@ -219,6 +227,7 @@
     map.on('load', function () {
       loading.classList.add('t3d-hide');
       setTimeout(function () { loading.style.display = 'none'; }, 600);
+      refreshScale();
       map.flyTo({ center: VIEW.center, zoom: VIEW.zoom, pitch: VIEW.pitch, bearing: VIEW.bearing, duration: 4200, essential: true });
       /* Nhãn: ẩn bớt khi zoom xa */
       var sync = function () {
@@ -482,7 +491,7 @@
       setTimeout(function () { hint.classList.add('t3d-hide'); }, 12000);
     }
 
-    function resize() { try { map.resize(); } catch (e) {} }
+    function resize() { try { map.resize(); } catch (e) {} refreshScale(); }
     global.addEventListener('resize', resize);
     if (global.ResizeObserver) { new ResizeObserver(resize).observe(wrap); }
     setTimeout(resize, 400);
