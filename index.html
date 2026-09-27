@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GOLDPULSE — Phân tích XAUUSD hằng tuần | Tuần 40 · 28/09 – 02/10/2026</title>
+<meta name="description" content="Bản tin phân tích kỹ thuật & cơ bản XAUUSD hằng tuần: mức giá then chốt, chỉ báo, kịch bản và kế hoạch giao dịch cho tuần 28/09 – 02/10/2026." />
+<meta name="theme-color" content="#070b12" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23f7d070'/%3E%3Cstop offset='1' stop-color='%23c9930a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%230a0f18'/%3E%3Cpath d='M9 22 16 9l7 13h-4l-3-5.5L13 22z' fill='url(%23g)'/%3E%3C/svg%3E" />
+</head>
+<body>
+
+<!-- ===================== NAVBAR ===================== -->
+<header class="nav" id="nav">
+  <div class="container nav__inner">
+    <a href="#top" class="brand">
+      <span class="brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="30" height="30"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7d070"/><stop offset="1" stop-color="#c9930a"/></linearGradient></defs><path d="M9 22 16 9l7 13h-4l-3-5.5L13 22z" fill="url(#lg)"/></svg>
+      </span>
+      <span class="brand__text">GOLD<em>PULSE</em><small>XAUUSD Weekly</small></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Điều hướng chính">
+      <a href="#overview">Tổng quan</a>
+      <a href="#chart">Biểu đồ</a>
+      <a href="#technical">Kỹ thuật</a>
+      <a href="#fundamental">Cơ bản</a>
+      <a href="#scenarios">Kịch bản</a>
+      <a href="#calendar">Lịch kinh tế</a>
+    </nav>
+    <div class="nav__right">
+      <div class="price-pill" id="pricePill" title="Giá tham chiếu (dữ liệu minh họa)">
+        <span class="price-pill__dot" aria-hidden="true"></span>
+        <span class="price-pill__label">XAU/USD</span>
+        <span class="price-pill__value" id="navPrice">4.321,0</span>
+        <span class="price-pill__chg down" id="navChange">-2,15%</span>
+      </div>
+      <a href="#newsletter" class="btn btn--primary btn--sm nav__cta">Nhận bản tin</a>
+      <button class="nav__burger" id="navBurger" aria-label="Mở menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ===================== HERO ===================== -->
+<section class="hero" id="overview">
+  <div class="hero__bg" aria-hidden="true">
+    <div class="hero__grid"></div>
+    <div class="hero__glow"></div>
+  </div>
+  <div class="container hero__inner">
+    <div class="hero__content">
+      <div class="badge reveal">
+        <span class="badge__pulse"></span> Bản tin Tuần 40 · 28/09 → 02/10/2026
+      </div>
+      <h1 class="hero__title reveal" style="--d:.05s">
+        Vàng mất mốc <span class="strike">4.400</span><br />
+        Thị trường <span class="text-gold">chờ NFP</span> phân định hướng đi
+      </h1>
+      <p class="hero__lead reveal" style="--d:.1s">
+        XAUUSD đóng cửa tuần tại <strong>4.321</strong>, giảm <strong>95 điểm (-2,15%)</strong> so với tuần trước.
+        Giá đang nằm dưới cả SMA20 lẫn SMA50 với chỉ còn <strong>131 điểm</strong> cách ngưỡng phân kỳ then chốt
+        <strong>4.190</strong> — một biến động tuần hoàn toàn có thể chạm tới mốc này trước khi bảng lương phi nông nghiệp
+        được công bố vào thứ Sáu.
+      </p>
+
+      <div class="hero__price reveal" style="--d:.15s">
+        <div class="hero__price-main">
+          <span class="hero__price-label">XAU/USD · Đóng cửa 25/09/2026</span>
+          <div class="hero__price-value">
+            <span id="heroPrice">4.321,0</span>
+            <span class="chip chip--down" id="heroChange">▼ 95,0 · -2,15%</span>
+          </div>
+          <span class="hero__price-sub">Biên độ tuần: 4.245 – 4.461 (216 điểm) · ATR(14): 69,7</span>
+        </div>
+      </div>
+
+      <div class="hero__stats reveal" style="--d:.2s">
+        <div class="stat">
+          <span class="stat__k">Xu hướng tuần</span>
+          <span class="stat__v down">Giảm nhẹ</span>
+        </div>
+        <div class="stat">
+          <span class="stat__k">RSI(14) D1</span>
+          <span class="stat__v" id="statRsi">40,7</span>
+        </div>
+        <div class="stat">
+          <span class="stat__k">MACD</span>
+          <span class="stat__v down">Phân kỳ âm</span>
+        </div>
+        <div class="stat">
+          <span class="stat__k">Vùng then chốt</span>
+          <span class="stat__v text-gold">4.245 – 4.367</span>
+        </div>
+      </div>
+
+      <div class="hero__cta reveal" style="--d:.25s">
+        <a href="#chart" class="btn btn--primary">Xem biểu đồ &amp; mức giá</a>
+        <a href="#scenarios" class="btn btn--ghost">Kịch bản tuần tới →</a>
+      </div>
+    </div>
+
+    <aside class="hero__card reveal" style="--d:.15s">
+      <div class="gauge-card">
+        <h3 class="gauge-card__title">Chỉ số xu hướng tuần</h3>
+        <div class="gauge" id="biasGauge">
+            <svg viewBox="0 0 240 162" aria-hidden="true">
+            <defs>
+              <linearGradient id="gg" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#f6465d"/><stop offset=".5" stop-color="#f7d070"/><stop offset="1" stop-color="#2ebd85"/>
+              </linearGradient>
+            </defs>
+            <path d="M20 124 A100 100 0 0 1 220 124" fill="none" stroke="rgba(148,163,184,.14)" stroke-width="16" stroke-linecap="round"/>
+            <path id="gaugeArc" d="M20 124 A100 100 0 0 1 220 124" fill="none" stroke="url(#gg)" stroke-width="16" stroke-linecap="round" stroke-dasharray="0 1000"/>
+            <g id="gaugeNeedle" transform="rotate(-90 120 124)">
+              <line x1="120" y1="124" x2="120" y2="42" stroke="#e8edf5" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="120" cy="124" r="7" fill="#e8edf5"/>
+              </g>
+              <text id="gaugeCenter" x="120" y="152" text-anchor="middle" fill="#f7d070" font-family="Space Grotesk, Inter, sans-serif" font-size="19" font-weight="700" letter-spacing="1.5">TRUNG LẬP</text>
+            </svg>
+            <div class="gauge__sub">thiên về giảm nhẹ</div>
+          <div class="gauge__scale"><span>Giảm mạnh</span><span>Tăng mạnh</span></div>
+        </div>
+        <ul class="gauge-card__list">
+          <li><span>Kháng cự gần</span><b class="down">4.367</b></li>
+          <li><span>Hỗ trợ then chốt</span><b class="up">4.245</b></li>
+          <li><span>Ngưỡng phân kỳ</span><b class="down">4.190</b></li>
+          <li><span>Giá hợp lý (FV)</span><b class="text-gold">4.001</b></li>
+        </ul>
+        <p class="gauge-card__note">
+          * Điểm xu hướng tổng hợp từ cấu trúc giá, động lượng và bối cảnh vĩ mô.
+          Không phải khuyến nghị đầu tư.
+        </p>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Ticker -->
+  <div class="ticker" aria-label="Bảng giá nhanh">
+    <div class="ticker__track" id="tickerTrack">
+      <div class="ticker__group">
+        <span>XAU/USD <b>4.321,0</b></span><span class="sep">◆</span>
+        <span>SMA20 <b class="down">4.394,9</b></span><span class="sep">◆</span>
+        <span>SMA50 <b class="down">4.403,9</b></span><span class="sep">◆</span>
+        <span>RSI(14) <b>40,7</b></span><span class="sep">◆</span>
+        <span>R1 <b class="down">4.367</b></span><span class="sep">◆</span>
+        <span>S1 <b class="up">4.245</b></span><span class="sep">◆</span>
+        <span>FLIP <b class="down">4.190</b></span><span class="sep">◆</span>
+        <span>FAIR VALUE <b class="text-gold">4.001</b></span><span class="sep">◆</span>
+        <span>ĐỈNH T8 <b>4.755</b></span><span class="sep">◆</span>
+        <span>NFP <b class="text-gold">02/10</b></span><span class="sep">◆</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CHART ===================== -->
+<section class="section" id="chart">
+  <div class="container">
+    <div class="section__head reveal">
+      <div>
+        <span class="section__kicker">Phân tích giá</span>
+        <h2 class="section__title">Biểu đồ XAU/USD &amp; mức then chốt</h2>
+      </div>
+      <p class="section__desc">
+        Nến nhật kỳ (D1). Vùng 4.245 – 4.367 đang là vùng quyết định: phá vỡ lên xác nhận hồi phục,
+        thủng xuống mở đường về ngưỡng phân kỳ 4.190.
+      </p>
+    </div>
+
+    <div class="panel chart-panel reveal" style="--d:.05s">
+      <div class="chart-panel__bar">
+        <div class="tabs" role="tablist" aria-label="Khung thời gian">
+          <button class="tab is-active" data-range="1M" role="tab" aria-selected="true">1 Tháng</button>
+          <button class="tab" data-range="3M" role="tab" aria-selected="false">3 Tháng</button>
+        </div>
+        <div class="chart-toggles">
+          <button class="toggle is-active" data-layer="sma20"><i style="--c:#f7d070"></i>SMA20</button>
+          <button class="toggle is-active" data-layer="sma50"><i style="--c:#7dd3fc"></i>SMA50</button>
+          <button class="toggle is-active" data-layer="levels"><i style="--c:#f6465d"></i>Mức then chốt</button>
+          <button class="toggle is-active" data-layer="volume"><i style="--c:#2ebd85"></i>Khối lượng</button>
+        </div>
+      </div>
+      <div class="chart-wrap" id="chartWrap">
+        <svg id="priceChart" class="chart" role="img" aria-label="Biểu đồ nến XAUUSD"></svg>
+        <div class="chart-tooltip" id="chartTip" hidden>
+          <div class="chart-tooltip__date" id="tipDate"></div>
+          <div class="chart-tooltip__row"><span>Mở</span><b id="tipOpen"></b></div>
+          <div class="chart-tooltip__row"><span>Cao</span><b id="tipHigh" class="up"></b></div>
+          <div class="chart-tooltip__row"><span>Thấp</span><b id="tipLow" class="down"></b></div>
+          <div class="chart-tooltip__row"><span>Đóng</span><b id="tipClose"></b></div>
+          <div class="chart-tooltip__row"><span>KL</span><b id="tipVol"></b></div>
+        </div>
+      </div>
+      <div class="chart-legend">
+        <span><i class="dot dot--up"></i>Nến tăng</span>
+        <span><i class="dot dot--down"></i>Nến giảm</span>
+        <span><i class="dot" style="background:#f7d070"></i>SMA20</span>
+        <span><i class="dot" style="background:#7dd3fc"></i>SMA50</span>
+        <span class="chart-legend__note">Dữ liệu minh họa · Cập nhật 27/09/2026</span>
+      </div>
+    </div>
+
+    <!-- Đa khung -->
+    <div class="panel mtf reveal" style="--d:.1s">
+      <h3 class="panel__title">Tổng hợp đa khung thời gian</h3>
+      <div class="table-scroll">
+        <table class="table">
+          <thead>
+            <tr><th>Khung</th><th>Xu hướng</th><th>Động lượng</th><th>Vùng quyết định</th><th>Tín hiệu</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>D1</b></td>
+              <td><span class="tag tag--down">Giảm</span></td>
+              <td>MACD âm, histogram -12,2</td>
+              <td>4.245 / 4.367</td>
+              <td><span class="tag tag--neutral">Chờ xác nhận</span></td>
+            </tr>
+            <tr>
+              <td><b>H4</b></td>
+              <td><span class="tag tag--neutral">Sideway</span></td>
+              <td>Stochastic hướng lên từ vùng quá bán</td>
+              <td>4.290 / 4.330</td>
+              <td><span class="tag tag--up">Hồi phục kỹ thuật</span></td>
+            </tr>
+            <tr>
+              <td><b>H1</b></td>
+              <td><span class="tag tag--up">Tăng nhẹ</span></td>
+              <td>Bật từ 4.245, kháng cự 4.330</td>
+              <td>4.300 / 4.345</td>
+              <td><span class="tag tag--up">Mua tích lũy</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TECHNICAL ===================== -->
+<section class="section section--alt" id="technical">
+  <div class="container">
+    <div class="section__head reveal">
+      <div>
+        <span class="section__kicker">Kỹ thuật</span>
+        <h2 class="section__title">Chỉ báo &amp; bản đồ mức giá</h2>
+      </div>
+      <p class="section__desc">
+        Cấu trúc giảm trung hạn vẫn chi phối: giá đóng cửa dưới SMA20 và SMA50, MACD ở vùng âm.
+        Tín hiệu mua chỉ xuất hiện khi vượt lại 4.367.
+      </p>
+    </div>
+
+    <div class="ind-grid">
+      <article class="ind reveal" style="--d:.02s">
+        <header><span class="ind__name">RSI(14) · D1</span><span class="tag tag--neutral">Trung tính</span></header>
+        <div class="ind__value">40,7</div>
+        <p>Rời khỏi vùng 50, thiên về nghịch lý giảm nhưng chưa quá bán — đà yếu chưa đủ sâu để bắt đáy.</p>
+        <div class="meter"><span style="width:40.7%"></span></div>
+        <div class="meter__labels"><span>0</span><span>30 · 70</span><span>100</span></div>
+      </article>
+
+      <article class="ind reveal" style="--d:.06s">
+        <header><span class="ind__name">MACD(12,26,9)</span><span class="tag tag--down">Phân kỳ âm</span></header>
+        <div class="ind__value">-32,99 <small>/ tín hiệu -20,78</small></div>
+        <p>Histogram âm (-12,21) và đang nới rộng — đà giảm trung hạn chưa có dấu hiệu suy yếu rõ nét.</p>
+        <div class="hist"><i class="down"></i><i class="down"></i><i class="down"></i><i class="down"></i><i class="down"></i><i class="down"></i></div>
+      </article>
+
+      <article class="ind reveal" style="--d:.1s">
+        <header><span class="ind__name">SMA20 / SMA50</span><span class="tag tag--down">Giá dưới TB</span></header>
+        <div class="ind__value">4.394,9 <small>/ 4.403,9</small></div>
+        <p>Giá nằm dưới cả hai đường trung bình; SMA20 đang dốc xuống và có thể cắt xuống SMA50 (death cross sớm).</p>
+        <div class="meter meter--split"><span style="width:52%" class="m50"></span><span style="width:48%" class="m20"></span></div>
+        <div class="meter__labels"><span class="text-gold">SMA20</span><span class="text-info">SMA50</span></div>
+      </article>
+
+      <article class="ind reveal" style="--d:.14s">
+        <header><span class="ind__name">Stochastic(14,5)</span><span class="tag tag--up">Gần quá bán</span></header>
+        <div class="ind__value">32,9 <small>/ 8,8</small></div>
+        <p>%K(5) xuống vùng quá bán trong ngắn hạn — điều kiện thuận lợi cho một nhịp hồi kỹ thuật về 4.340 – 4.367.</p>
+        <div class="meter"><span style="width:32.9%"></span></div>
+        <div class="meter__labels"><span>Quá bán</span><span>Quá mua</span></div>
+      </article>
+
+      <article class="ind reveal" style="--d:.18s">
+        <header><span class="ind__name">Bollinger(20,2)</span><span class="tag tag--neutral">Nửa dưới</span></header>
+        <div class="ind__value">4.218 <small>– 4.569</small></div>
+        <p>Giá di chuyển ở nửa dưới dải băng (trung tâm 4.395). Dải đang thu hẹp — báo hiệu biến động sắp mở rộng.</p>
+        <div class="bb"><span class="bb__mid"></span><span class="bb__fill"></span><span class="bb__dot" style="left:35%"></span></div>
+      </article>
+
+      <article class="ind reveal" style="--d:.22s">
+        <header><span class="ind__name">ATR(14) · D1</span><span class="tag tag--neutral">Biến động TB</span></header>
+        <div class="ind__value">69,7 <small>USD/ngày</small></div>
+        <p>Biên độ trung bình gần đây phù hợp kỳ vọng ~216 điểm/tuần — đủ rộng để các kịch bản dưới đây diễn ra trong 5 phiên.</p>
+        <div class="hist"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </article>
+    </div>
+
+    <!-- Support / Resistance -->
+    <div class="panel levels reveal" style="--d:.08s">
+      <h3 class="panel__title">Bản đồ mức giá then chốt</h3>
+      <div class="levels__viz" id="levelsViz">
+        <!-- dựng bằng JS -->
+      </div>
+      <div class="table-scroll">
+        <table class="table">
+          <thead>
+            <tr><th>Mức</th><th>Giá</th><th>Khoảng cách</th><th>Ý nghĩa</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><b>R3</b></td><td class="down">4.698</td><td>+377</td><td>Đỉnh tháng 8, kháng cự trung hạn</td></tr>
+            <tr><td><b>R2</b></td><td class="down">4.554</td><td>+233</td><td>Mục tiêu mở rộng nếu vượt 4.425</td></tr>
+            <tr><td><b>R1</b></td><td class="down">4.367</td><td>+46</td><td>Kháng cự gần — mốc xác nhận hồi phục</td></tr>
+            <tr class="is-current"><td><b class="text-gold">GIÁ</b></td><td class="text-gold">4.321</td><td>—</td><td>Đóng cửa tuần 25/09/2026</td></tr>
+            <tr><td><b>S1</b></td><td class="up">4.245</td><td>-76</td><td>Hỗ trợ tích lũy của 2 tuần</td></tr>
+            <tr><td><b>S2</b></td><td class="down">4.190</td><td>-131</td><td>Ngưỡng phân kỳ (flip-to-short)</td></tr>
+            <tr><td><b>S3</b></td><td class="up">4.168</td><td>-153</td><td>Đáy tháng 9</td></tr>
+            <tr><td><b>S4</b></td><td class="up">4.040</td><td>-281</td><td>Hỗ trợ kỹ thuật tiếp theo</td></tr>
+            <tr><td><b>S5</b></td><td class="text-gold">4.001</td><td>-320</td><td>Giá hợp lý (Fair Value)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FUNDAMENTAL ===================== -->
+<section class="section" id="fundamental">
+  <div class="container">
+    <div class="section__head reveal">
+      <div>
+        <span class="section__kicker">Cơ bản</span>
+        <h2 class="section__title">Bốn động lực vĩ mô chi phối tuần tới</h2>
+      </div>
+      <p class="section__desc">
+        Toàn bộ bức tranh vĩ mô hiện tại nghiêng về phía áp lực lên vàng: lãi suất thực hấp dẫn hơn,
+        đồng USD mạnh và rủi ro tăng trưởng thấp.
+      </p>
+    </div>
+
+    <div class="macro-grid">
+      <article class="macro reveal" style="--d:.02s">
+        <div class="macro__icon macro__icon--down" aria-hidden="true">▲</div>
+        <h3>Fed theo đà “hawkish”</h3>
+        <p>
+          Sau đợt tăng lãi suất đầu tiên trong ba năm hồi tháng 9, thị trường định giá
+          <strong>~53%</strong> khả năng tăng tiếp tại cuộc họp tháng 10 (CME FedWatch).
+          Phát biểu của Barkin và Collins nhấn mạnh rủi ro lạm phát kéo dài.
+        </p>
+        <div class="macro__foot"><span class="tag tag--down">Tiêu cực cho vàng</span><span class="macro__impact">Ảnh hưởng: Cao</span></div>
+      </article>
+
+      <article class="macro reveal" style="--d:.06s">
+        <div class="macro__icon macro__icon--down" aria-hidden="true">%</div>
+        <h3>Lợi suất trái phiếu Mỹ</h3>
+        <p>
+          Lợi suất TO 10 năm quay lại vùng đỉnh gần đây làm tăng chi phí cơ hội khi nắm giữ kim loại không sinh lời.
+          Yields giảm trở lại sẽ là chất xúc tác đầu tiên cho một nhịp hồi.
+        </p>
+        <div class="macro__foot"><span class="tag tag--down">Tiêu cực cho vàng</span><span class="macro__impact">Ảnh hưởng: Cao</span></div>
+      </article>
+
+      <article class="macro reveal" style="--d:.1s">
+        <div class="macro__icon macro__icon--down" aria-hidden="true">#</div>
+        <h3>Thị trường lao động bền vững</h3>
+        <p>
+          Yêu cầu trợ cấp thất nghiệp tuần trước giảm còn <strong>197.000</strong>, thấp hơn dự báo 201.000.
+          Dữ liệu vững giúp Fed giữ lập trường thắt chặt và hạn chế đà tăng của vàng.
+        </p>
+        <div class="macro__foot"><span class="tag tag--down">Tiêu cực cho vàng</span><span class="macro__impact">Trung bình</span></div>
+      </article>
+
+      <article class="macro reveal" style="--d:.14s">
+        <div class="macro__icon macro__icon--up" aria-hidden="true">+</div>
+        <h3>Cầu đầu tư &amp; ngân hàng trung ương</h3>
+        <p>
+          Dòng vào ETF vàng và nhu cầu mua tích trữ của các ngân hàng trung ương vẫn là điểm tựa quan trọng,
+          hạn chế đà giảm sâu và tạo sóng hồi mỗi khi giá về vùng 4.000 – 4.100.
+        </p>
+        <div class="macro__foot"><span class="tag tag--up">Tích cực cho vàng</span><span class="macro__impact">Trung bình</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SCENARIOS ===================== -->
+<section class="section section--alt" id="scenarios">
+  <div class="container">
+    <div class="section__head reveal">
+      <div>
+        <span class="section__kicker">Chiến lược</span>
+        <h2 class="section__title">Ba kịch bản cho tuần 28/09 – 02/10</h2>
+      </div>
+      <p class="section__desc">
+        Nhấn vào từng kịch bản để xem điều kiện kích hoạt, mục tiêu và mức vô hiệu hóa.
+        Xác suất là đánh giá chủ quan của bộ phận phân tích.
+      </p>
+    </div>
+
+    <div class="scen-grid">
+      <article class="scen scen--up reveal" style="--d:.02s" data-scen="bull">
+        <div class="scen__prob"><span>25%</span><small>Xác suất</small></div>
+        <h3>Vượt đỉnh tuần</h3>
+        <p class="scen__sub">Kịch bản tăng</p>
+        <ul class="scen__list">
+          <li><b>Kích hoạt:</b> đóng cửa D1 trên <b>4.367</b> kèm khối lượng trên trung bình</li>
+          <li><b>Mục tiêu:</b> 4.425 → 4.554</li>
+          <li><b>Vô hiệu:</b> quay lại dưới 4.340</li>
+        </ul>
+        <button class="scen__more" aria-expanded="false">Chi tiết kế hoạch <span>+</span></button>
+        <div class="scen__detail" hidden>
+          <p>Đà giảm chững lại khi Stochastic về vùng quá bán, dải Bollinger thu hẹp. Nếu đồng USD dịu đi trước NFP,
+          dòng tiền kỹ thuật có thể đẩy nhanh về vùng 4.425. Giao dịch: chờ breakout thay vì bắt đáy.</p>
+        </div>
+      </article>
+
+      <article class="scen scen--flat reveal" style="--d:.06s" data-scen="base">
+        <div class="scen__prob scen__prob--gold"><span>45%</span><small>Xác suất</small></div>
+        <h3>Tích lũy trong vùng</h3>
+        <p class="scen__sub">Kịch bản cơ sở</p>
+        <ul class="scen__list">
+          <li><b>Phạm vi:</b> 4.245 – 4.367, thu hẹp dần về cuối tuần</li>
+          <li><b>Hành vi:</b> hai bên thận trọng chờ NFP thứ Sáu</li>
+          <li><b>Vô hiệu:</b> đóng cửa ngoài biên độ 4.245 / 4.367</li>
+        </ul>
+        <button class="scen__more" aria-expanded="false">Chi tiết kế hoạch <span>+</span></button>
+        <div class="scen__detail" hidden>
+          <p>Không có động lực rõ ràng khi lãi suất và dữ liệu việc làm chưa phát đi tín hiệu mới.
+          Giao dịch trong biên độ ở khung nhỏ, hạn chế vị thế qua đêm trước thứ Sáu.</p>
+        </div>
+      </article>
+
+      <article class="scen scen--down reveal" style="--d:.1s" data-scen="bear">
+        <div class="scen__prob scen__prob--red"><span>30%</span><small>Xác suất</small></div>
+        <h3>Thủng ngưỡng phân kỳ</h3>
+        <p class="scen__sub">Kịch bản giảm</p>
+        <ul class="scen__list">
+          <li><b>Kích hoạt:</b> đóng cửa tuần dưới <b>4.190</b></li>
+          <li><b>Mục tiêu:</b> 4.040 → 4.001 (Fair Value)</li>
+          <li><b>Vô hiệu:</b> giữ trên 4.245</li>
+        </ul>
+        <button class="scen__more" aria-expanded="false">Chi tiết kế hoạch <span>+</span></button>
+        <div class="scen__detail" hidden>
+          <p>Khoảng cách 131 điểm đến ngưỡng 4.190 là hẹp so với biên độ kỳ vọng 216 điểm. Nếu NFP mạnh,
+          áp lực bán có thể đẩy giá kiểm tra toàn bộ vùng 4.040 – 4.001 — nơi cơ quan mua tích trữ có thể can thiệp.</p>
+        </div>
+      </article>
+    </div>
+
+    <!-- Trade plan -->
+    <div class="panel tradeplan reveal" style="--d:.08s">
+      <h3 class="panel__title">Kế hoạch giao dịch đề xuất</h3>
+      <div class="table-scroll">
+        <table class="table">
+          <thead>
+            <tr><th>Phương án</th><th>Loại lệnh</th><th>Vào lệnh</th><th>Stop Loss</th><th>Take Profit</th><th>R:R (TP1 / TP2)</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>A</b> · Phá vỡ giảm</td>
+              <td><span class="tag tag--down">Sell Stop</span></td>
+              <td>4.180</td><td>4.225</td><td>4.040 → 4.001</td><td class="text-gold">1:3,1 / 1:4,0</td>
+            </tr>
+            <tr>
+              <td><b>B</b> · Hồi phục</td>
+              <td><span class="tag tag--up">Buy Stop</span></td>
+              <td>4.372</td><td>4.340</td><td>4.425 → 4.554</td><td class="text-gold">1:1,7 / 1:5,7</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tradeplan__note">
+        ⚠️ Các lệnh dừng chỉ kích hoạt khi có xác nhận đóng cửa. Giảm 50% khối lượng trước phiên NFP
+        (thứ Sáu 02/10, 19:30 GMT+7) và không nắm giữ vị thế qua cuối tuần nếu chưa có mục tiêu rõ ràng.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CALENDAR ===================== -->
+<section class="section" id="calendar">
+  <div class="container">
+    <div class="section__head reveal">
+      <div>
+        <span class="section__kicker">Lịch kinh tế</span>
+        <h2 class="section__title">Sự kiện then chốt tuần 28/09 – 02/10</h2>
+      </div>
+      <p class="section__desc">Giờ hiển thị theo GMT+7. Các sự kiện đánh dấu “Rất cao” thường tạo biến động mạnh ngay khi công bố.</p>
+    </div>
+
+    <div class="panel reveal" style="--d:.05s">
+      <div class="table-scroll">
+        <table class="table table--cal">
+          <thead>
+            <tr><th>Thời gian</th><th>Sự kiện</th><th>Kỳ vọng</th><th>Ảnh hưởng</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Thứ 2 · 28/09 · 21:00</td>
+              <td>Phát biểu thành viên FOMC (Collins, Barkin)</td>
+              <td>—</td>
+              <td><span class="impact impact--mid">Trung bình</span></td>
+            </tr>
+            <tr>
+              <td>Thứ 3 · 29/09 · 21:00</td>
+              <td>Chỉ số niềm tin tiêu dùng Conference Board</td>
+              <td>103,5</td>
+              <td><span class="impact impact--mid">Trung bình</span></td>
+            </tr>
+            <tr>
+              <td>Thứ 4 · 30/09 · 19:15</td>
+              <td>Báo cáo việc làm ADP (tháng 9)</td>
+              <td>+68K</td>
+              <td><span class="impact impact--high">Cao</span></td>
+            </tr>
+            <tr>
+              <td>Thứ 4 · 30/09 · 21:45</td>
+              <td>PMI chế xuất Chicago</td>
+              <td>47,0</td>
+              <td><span class="impact impact--low">Thấp</span></td>
+            </tr>
+            <tr>
+              <td>Thứ 5 · 01/10 · 21:00</td>
+              <td>ISM chế xuất PMI (tháng 9)</td>
+              <td>49,0</td>
+              <td><span class="impact impact--high">Cao</span></td>
+            </tr>
+            <tr class="is-hot">
+              <td>Thứ 6 · 02/10 · 19:30</td>
+              <td><b>Bảng lương phi nông nghiệp (NFP) tháng 9</b></td>
+              <td>+145K</td>
+              <td><span class="impact impact--max">Rất cao</span></td>
+            </tr>
+            <tr class="is-hot">
+              <td>Thứ 6 · 02/10 · 19:30</td>
+              <td><b>Tỷ lệ thất nghiệp tháng 9</b></td>
+              <td>4,4%</td>
+              <td><span class="impact impact--max">Rất cao</span></td>
+            </tr>
+            <tr>
+              <td>Thứ 6 · 02/10 · 21:00</td>
+              <td>Đơn đặt hàng nhà máy &amp; phát biểu FOMC</td>
+              <td>+0,8%</td>
+              <td><span class="impact impact--mid">Trung bình</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FAQ + NEWSLETTER ===================== -->
+<section class="section section--alt" id="faq">
+  <div class="container narrow">
+    <div class="section__head reveal">
+      <div>
+        <span class="section__kicker">Hỏi đáp</span>
+        <h2 class="section__title">Câu hỏi thường gặp</h2>
+      </div>
+    </div>
+
+    <div class="faq reveal">
+      <details class="faq__item">
+        <summary>Vì sao mức 4.190 được coi là ngưỡng then chốt?<span>+</span></summary>
+        <div class="faq__body">Đây là ngưỡng kích hoạt đảo chiều của hệ thống phân kỳ parabolic trên khung tuần. Một đóng cửa tuần dưới 4.190 sẽ tái phân loại xu hướng từ “tăng” sang “giảm”, mang trọng lượng lớn hơn một đường hỗ trợ thông thường vì nó đòi hỏi phá vỡ cấu trúc bền vững. Hiện giá chỉ cách mốc này 131 điểm.</div>
+      </details>
+      <details class="faq__item">
+        <summary>NFP sẽ tác động thế nào đến XAUUSD?<span>+</span></summary>
+        <div class="faq__body">NFP mạnh hơn dự báo thường hỗ trợ USD và lợi suất, tạo áp lực lên vàng; ngược lại, số liệu yếu sẽ làm sống lại kỳ vọng nới lỏng. Trong bối cảnh Fed vừa tăng lãi suất và thị trường định giá ~53% khả năng tăng tiếp, một NFP mạnh có thể đẩy giá về 4.040 – 4.001.</div>
+      </details>
+      <details class="faq__item">
+        <summary>Dữ liệu trên website có phải giá thời gian thực?<span>+</span></summary>
+        <div class="faq__body">Không. Biểu đồ và chỉ báo được dựng lại từ các mốc giá công bố trong tuần 21–26/09/2026 cho mục đích minh họa phương pháp phân tích. Giá trong khung điều hướng chỉ mang tính tham chiếu. Hãy đối chiếu với nguồn dữ liệu của sàn trước khi ra quyết định.</div>
+      </details>
+      <details class="faq__item">
+        <summary>Làm thế nào để nhận bản tin mỗi tuần?<span>+</span></summary>
+        <div class="faq__body">Để lại email trong mục bên dưới. Bản tin phát hành mỗi Chủ nhật, tóm tắt diễn biến tuần qua, mức giá then chốt và kịch bản cho tuần kế tiếp. (Phiên bản demo — email không được gửi đi.)</div>
+      </details>
+    </div>
+
+    <div class="newsletter reveal" id="newsletter">
+      <div class="newsletter__text">
+        <h3>Nhận bản tin GOLDPULSE mỗi Chủ nhật</h3>
+        <p>Phân tích XAUUSD, mức giá then chốt và kịch bản tuần tới — gọn trong 5 phút đọc.</p>
+      </div>
+      <form class="newsletter__form" id="newsletterForm">
+        <input type="email" id="newsletterEmail" placeholder="email@example.com" aria-label="Địa chỉ email" required />
+        <button type="submit" class="btn btn--primary">Đăng ký</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a href="#top" class="brand">
+          <span class="brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" width="26" height="26"><path d="M9 22 16 9l7 13h-4l-3-5.5L13 22z" fill="#f7d070"/></svg>
+          </span>
+          <span class="brand__text">GOLD<em>PULSE</em></span>
+        </a>
+        <p>Bản tin phân tích XAUUSD hằng tuần — kỹ thuật, cơ bản và kế hoạch giao dịch dựa trên mức giá then chốt.</p>
+      </div>
+      <div>
+        <h4>Nội dung</h4>
+        <ul>
+          <li><a href="#overview">Tổng quan tuần</a></li>
+          <li><a href="#chart">Biểu đồ giá</a></li>
+          <li><a href="#technical">Phân tích kỹ thuật</a></li>
+          <li><a href="#fundamental">Phân tích cơ bản</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Công cụ</h4>
+        <ul>
+          <li><a href="#scenarios">Kịch bản &amp; kế hoạch</a></li>
+          <li><a href="#calendar">Lịch kinh tế</a></li>
+          <li><a href="#faq">Hỏi đáp</a></li>
+          <li><a href="#newsletter">Nhận bản tin</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Tuần 40 / 2026</h4>
+        <ul>
+          <li>28/09 – 02/10/2026</li>
+          <li>Đóng cửa: 4.321,0</li>
+          <li>Biến động WoW: -2,15%</li>
+          <li>Mức then chốt: 4.245 / 4.367</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__disclaimer">
+      <p><b>Tuyên bố miễn trừ trách nhiệm:</b> Toàn bộ nội dung trên website mang tính chất giáo dục và tham khảo,
+      không phải khuyến nghị đầu tư, lời khuyên tài chính hay đề nghị giao dịch. Giao dịch vàng, ngoại hối và
+      các công cụ phái sinh sử dụng đòn bẩy có rủi ro cao và có thể không phù hợp với mọi nhà đầu tư.
+      Dữ liệu giá, chỉ báo và lịch kinh tế trên trang được dựng lại cho mục đích minh họa; kết quả giao dịch
+      trong quá khứ không đảm bảo kết quả tương lai. Hãy tự chịu trách nhiệm đánh giá và tham khảo ý kiến
+      chuyên gia độc lập trước khi ra quyết định.</p>
+    </div>
+    <div class="footer__bottom">
+      <span>© 2026 GOLDPULSE · viet5ers.github.io</span>
+      <span>Dữ liệu minh họa · Cập nhật 27/09/2026</span>
+    </div>
+  </div>
+</footer>
+
+<button class="to-top" id="toTop" aria-label="Lên đầu trang">↑</button>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
