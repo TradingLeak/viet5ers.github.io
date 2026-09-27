@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://viet5ers.github.io/sitemap.xml
